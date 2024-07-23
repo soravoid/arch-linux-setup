@@ -15,3 +15,8 @@
           - webcord
           - anki
         state: present
+
+- name: Set up AstroNvim config
+  ansible.builtin.git:
+    repo: gitea@git.jaden.rs:suusuu/astronvim-user-config.git
+    separate_git_dir: /home/user/.config/nvim
