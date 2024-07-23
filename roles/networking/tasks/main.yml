@@ -9,7 +9,7 @@
 - name: Use iwd as backend for NetworkManager
   ansible.builtin.blockinfile:
     path: /etc/NetworkManager/conf.d/wifi_backend.conf
-    create: yes 
+    create: true
     owner: root
     group: root
     mode: '0644'
@@ -40,7 +40,7 @@
 - name: Enable IPv6 privacy extensions
   ansible.builtin.blockinfile:
     path: /etc/NetworkManager/NetworkManager.conf
-    create: yes
+    create: true
     owner: root
     group: root
     mode: '0644'
@@ -55,10 +55,9 @@
         name: mullvad-vpn
         state: present
         use: paru
-      become: yes
+      become: true
       become_user: aur_builder
     - name: Enabling Mullvad VPN systemd service
       ansible.builtin.systemd:
         name: mullvad-daemon
         enabled: true
-

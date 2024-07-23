@@ -64,7 +64,7 @@
   ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     line: 'PermitRootLogin no'
-    create: yes
+    create: true
     owner: root
     group: root
     mode: '0644'
@@ -79,7 +79,7 @@
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/admin-account
     line: 'admin ALL=(ALL) ALL'
-    create: yes
+    create: true
     owner: root
     group: root
     mode: '0644'
@@ -122,7 +122,7 @@
     - name: Prevent systemd from core dumping
       ansible.builtin.blockinfile:
         path: /etc/systemd/coredump.conf.d/disable.conf
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
@@ -133,7 +133,7 @@
       ansible.builtin.lineinfile:
         path: /etc/security/limits.conf
         line: '* hard core 0'
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
@@ -148,7 +148,7 @@
       ansible.builtin.lineinfile:
         path: /usr/lib/modules-load.d/jitterentropy.conf
         line: jitterentropy_rng
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'

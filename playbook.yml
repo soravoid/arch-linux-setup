@@ -1,10 +1,11 @@
-- hosts: localhost
+- name: Install Arch Linux
+  hosts: localhost
   roles:
-    - create-aur-builder
-    - set-up-users
+    - create_aur_builder
+    - set_up_users
     - networking
     - security
     - performance
-    - desktop-env
+    - desktop_env
     - general
-    - delete-aur-builder
+    - delete_aur_builder
