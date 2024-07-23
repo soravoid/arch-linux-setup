@@ -1,0 +1,10 @@
+- hosts: localhost
+  roles:
+    - create-aur-builder
+    - set-up-users
+    - networking
+    - security
+    - performance
+    - desktop-env
+    - general
+    - delete-aur-builder

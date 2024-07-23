@@ -1,0 +1,52 @@
+- name: Set up KDE
+  block:
+    - name: Install KDE packages
+      community.general.pacman:
+        name:
+          - plasma-desktop
+          - bluedevil
+          - breeze
+          - breeze-gtk
+          - breeze-plymouth
+          - drkonqi
+          - kactivitymanagerd
+          - kde-cli-tools
+          - kde-gtk-config
+          - kpipewire
+          - kscreen
+          - kscreenlocker
+          - ksystemstats
+          - kwallet-pam
+          - kwayland
+          - kwayland-integration
+          - kwin
+          - kwrited
+          - layer-shell-qt
+          - libkscreen
+          - libksysguard
+          - libplasma
+          - baloo
+          - milou
+          - plasma-disks
+          - plasma-integration
+          - plasma-nm
+          - plasma-systemmonitor
+          - plasma-workspace
+          - plymouth-kcm
+          - powerdevil
+          - sddm-kcm
+          - systemsettings
+          - xdg-desktop-portal-kde
+          - gwenview
+          - kimageformats
+          - baloo-widgets
+          - dolphin-plugins
+          - ffmpegthumbs
+          - kdegraphics-thumbnailers
+          - libappindicator-gtk3
+          - phonon-vlc
+        state: present
+    - name: Enable SDDM systemd service
+      ansible.builtin.systemd:
+        name: sddm
+        enabled: true

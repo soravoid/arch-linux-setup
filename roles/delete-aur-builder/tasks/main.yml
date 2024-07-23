@@ -1,0 +1,10 @@
+- name: Prevent user 'aur_builder' from using sudo
+  ansible.builtin.file:
+    path: /etc/sudoers.d/11-install-aur_builder
+    state: absent
+
+- name: Delete 'aur_builder' user
+  ansible.builtin.user:
+    name: aur_builder
+    state: absent
+    remove: true

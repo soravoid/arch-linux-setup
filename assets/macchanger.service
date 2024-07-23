@@ -1,0 +1,13 @@
+[Unit]
+Description=macchanger on wlan0
+Wants=network-pre.target
+Before=network-pre.target
+BindsTo=sys-subsystem-net-devices-wlan0.device
+After=sys-subsystem-net-devices-wlan0.device
+
+[Service]
+ExecStart=/usr/bin/macchanger -e wlan0
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,154 @@
+- name: Add boot hardening params to bootloader
+  ansible.builtin.copy:
+    src: assets/boot_hardening.conf
+    dest: /etc/cmdline.d/boot_hardening.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Add sysctl hardening params to boot params
+  ansible.builtin.copy:
+    src: assets/sysctl_hardening.conf
+    dest: /etc/cmdline.d/sysctl_hardening.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Add kernel module blacklists
+  block:
+    - name: Copying obscure_network_protocols.conf
+      ansible.builtin.copy:
+        src: assets/obscure_network_protocols.conf
+        dest: /etc/cmdline.d/obscure_network_protocols.conf
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Copying rare_filesystems.conf
+      ansible.builtin.copy:
+        src: assets/rare_filesystems.conf
+        dest: /etc/cmdline.d/rare_filesystems.conf
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Copying network_filesystems.conf
+      ansible.builtin.copy:
+        src: assets/network_filesystems.conf
+        dest: /etc/cmdline.d/network_filesystems.conf
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Copying blacklist_misc.conf
+      ansible.builtin.copy:
+        src: assets/blacklist_misc.conf
+        dest: /etc/cmdline.d/blacklist_misc.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+- name: Restrict su to wheel
+  block:
+    - name: Editing /etc/pam.d/su
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/su
+        regexp: '^#(auth\s+required\s+pam_wheel.so\s+use_uid)'
+        backrefs: true
+        line: '\1'
+    - name: Editing /etc/pam.d/su-l
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/su-l
+        regexp: '^#(auth\s+required\s+pam_wheel.so\s+use_uid)'
+        backrefs: true
+        line: '\1'
+
+- name: Prevent SSH into root
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    line: 'PermitRootLogin no'
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Increase number of hashing rounds
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/passwd
+    regexp: '^password'
+    line: 'password required pam_unix.so sha512 shadow nullok rounds=65536'
+
+- name: Allow user 'admin' to use sudo
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/admin-account
+    line: 'admin ALL=(ALL) ALL'
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Setting generic Machine ID
+  ansible.builtin.copy:
+    content: 'b08dfa6083e7567a1921a715000001fb'
+    dest: /etc/machine-id
+    owner: root
+    group: root
+    mode: '0444'
+
+- name: Set up secure-time-sync and cron
+  block:
+    - name: Install cronie
+      community.general.pacman:
+        name: cronie
+        state: present
+    - name: Install secure-time-sync into /usr/local/sbin
+      ansible.builtin.copy:
+        src: assets/secure-time-sync
+        dest: /usr/local/sbin/secure-time-sync
+        owner: root
+        group: root
+        mode: '0755'
+    - name: Symlink secure-time-sync to /etc/cron.daily
+      ansible.builtin.file:
+        src: /usr/local/sbin/secure-time-sync
+        path: /etc/cron.daily/secure-time-sync
+        state: link
+    - name: Enable cronie systemd service
+      ansible.builtin.systemd:
+        name: cronie
+        enabled: true
+        state: started
+
+- name: Prevent core dumps
+  block:
+    - name: Prevent systemd from core dumping
+      ansible.builtin.blockinfile:
+        path: /etc/systemd/coredump.conf.d/disable.conf
+        create: yes
+        owner: root
+        group: root
+        mode: '0644'
+        block: |
+          [Coredump]
+          Storage=none
+    - name: Prevent ulimit from core dumping
+      ansible.builtin.lineinfile:
+        path: /etc/security/limits.conf
+        line: '* hard core 0'
+        create: yes
+        owner: root
+        group: root
+        mode: '0644'
+
+- name: Set up jitterentropy_rng
+  block:
+    - name: Install jitterentropy
+      community.general.pacman:
+        name: jitterentropy
+        state: present
+    - name: Load jitterentropy module early
+      ansible.builtin.lineinfile:
+        path: /usr/lib/modules-load.d/jitterentropy.conf
+        line: jitterentropy_rng
+        create: yes
+        owner: root
+        group: root
+        mode: '0644'

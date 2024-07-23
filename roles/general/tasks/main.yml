@@ -1,0 +1,17 @@
+- name: Installing frequently used packages
+  block:
+    - name: Installing packages from official repos
+      community.general.pacman:
+        name:
+          - firefox
+          - neovim
+          - kitty
+          - thunderbird
+          - mpv
+        state: present
+    - name: Installing packages from AUR
+      kewlfft.aur.aur:
+        name:
+          - webcord
+          - anki
+        state: present

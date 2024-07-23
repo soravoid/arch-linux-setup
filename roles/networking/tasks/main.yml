@@ -1,0 +1,64 @@
+- name: Install packages for networking
+  community.general.pacman:
+    name:
+      - networkmanager
+      - iwd
+      - macchanger
+    state: present
+
+- name: Use iwd as backend for NetworkManager
+  ansible.builtin.blockinfile:
+    path: /etc/NetworkManager/conf.d/wifi_backend.conf
+    create: yes 
+    owner: root
+    group: root
+    mode: '0644'
+    block: |
+      [device]
+      wifi.backend=iwd
+
+- name: Enable NetworkManager systemd service
+  ansible.builtin.systemd:
+    name: NetworkManager
+    enabled: true
+    state: started
+
+- name: Install macchanger systemd service
+  ansible.builtin.copy:
+    src: assets/macchanger.service
+    dest: /etc/systemd/system/macchanger.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable macchanger systemd service
+  ansible.builtin.systemd:
+    name: macchanger
+    daemon_reload: true
+    enabled: true
+
+- name: Enable IPv6 privacy extensions
+  ansible.builtin.blockinfile:
+    path: /etc/NetworkManager/NetworkManager.conf
+    create: yes
+    owner: root
+    group: root
+    mode: '0644'
+    block: |
+      [connection]
+      ipv6.ip6-privacy=2
+
+- name: Set up Mullvad VPN
+  block:
+    - name: Installing Mullvad VPN...
+      kewlfft.aur.aur:
+        name: mullvad-vpn
+        state: present
+        use: paru
+      become: yes
+      become_user: aur_builder
+    - name: Enabling Mullvad VPN systemd service
+      ansible.builtin.systemd:
+        name: mullvad-daemon
+        enabled: true
+
