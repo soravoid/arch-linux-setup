@@ -1,4 +1,4 @@
-- name: Installing frequently used packages
+- name: Install frequently used packages
   block:
     - name: Installing packages from official repos
       community.general.pacman:
