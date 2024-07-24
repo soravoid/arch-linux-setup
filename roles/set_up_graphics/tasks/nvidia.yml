@@ -22,11 +22,34 @@
 - name: Enable NVIDIA DRM
   ansible.builtin.lineinfile:
     path: /etc/modprobe.d/nvidia.conf
-    line: options nvidia_drm modeset=1
+    line: 'options nvidia_drm modeset=1 fbdev=1'
     create: true
     owner: root
     group: root
     mode: '0644'
+
+- name: Enable NVIDIA suspend
+  block:
+    - name: Add kernel module parameter
+      ansible.builtin.lineinfile:
+        path: /etc/modprobe.d/nvidia.conf
+        line: 'options nvidia NVreg_PreserveVideoMemoryAllocations=1'
+        create: true
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Enable nvidia-suspend service
+      ansible.builtin.systemd_service:
+        name: nvidia-suspend
+        enabled: true
+    - name: Enable nvidia-hibernate service
+      ansible.builtin.systemd_service:
+        name: nvidia-hibernate
+        enabled: true
+    - name: Enable nvidia-resume service
+      ansible.builtin.systemd_service:
+        name: nvidia-resume
+        enabled: true
 
 - name: Enable early loading for NVIDIA
   ansible.builtin.lineinfile:

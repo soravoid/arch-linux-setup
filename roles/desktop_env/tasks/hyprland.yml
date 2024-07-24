@@ -1,0 +1,53 @@
+- name: Install hyprland packages
+  community.general.pacman:
+    name:
+      - hyprland
+      - xdg-desktop-portal-hyprland
+      - mako
+      - polkit-kde-agent
+      - qt5-wayland
+      - qt6-wayland
+      - swww
+      - hypridle
+      - hyprlock
+      - hyprcursor
+    state: present
+
+- name: Install hyprland AUR packages
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - nordzy-cursors-hyprcursor
+      - anyrun-git
+    state: present
+
+- name: Set up NVIDIA for Hyprland
+  when: nvidia
+  block:
+    - name: Install required packages
+      community.general.pacman:
+        name: egl-wayland
+        state: present
+    - name: Move environment variables to hyprland.conf
+      ansible.builtin.shell: ./hyprland_envvars.py /home/user
+      args:
+        chdir: assets
+    - name: Add cursor block to hyprland.conf
+      ansible.builtin.blockinfile:
+        block: |
+          cursor {
+              no_hardware_cursors = true
+          }
+        path: /home/user/.config/hypr/hyprland.conf
+        create: no
+
+- name: Set up mako notification daemon
+  ansible.builtin.lineinfile:
+    path: /home/user/.config/hypr/hyprland.conf
+    line: 'exec-once=mako'
+
+- name: Set up polkit auth agent
+  ansible.builtin.lineinfile:
+    path: /home/user/.config/hypr/hyprland.conf
+    line: 'exec-once=/usr/lib/polkit-kde-authentication-agent-1'
