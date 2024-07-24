@@ -16,6 +16,12 @@
           - anki
         state: present
 
+- name: Enable multilib repository
+  ansible.builtin.replace:
+    path: /etc/pacman.conf
+    regexp: '(?m)^#(\[multilib\])$\n#(Include = \/etc\/pacman\.d\/mirrorlist)$'
+    replace: '\1\n\2'
+
 - name: Set up AstroNvim config
   ansible.builtin.git:
     repo: gitea@git.jaden.rs:suusuu/astronvim-user-config.git

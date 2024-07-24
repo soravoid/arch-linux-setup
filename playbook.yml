@@ -1,11 +1,16 @@
 - name: Install Arch Linux
   hosts: localhost
+  vars_prompt:
+    - name: use_lib32
+      prompt: Include multilib repository? (true/false) 
+      private: false
   roles:
     - create_aur_builder
     - set_up_users
     - networking
     - security
     - performance
-    - desktop_env
     - general
+    - set_up_graphics
+    - desktop_env
     - delete_aur_builder

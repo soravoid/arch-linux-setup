@@ -47,6 +47,6 @@
           - phonon-vlc
         state: present
     - name: Enable SDDM systemd service
-      ansible.builtin.systemd:
+      ansible.builtin.systemd_service:
         name: sddm
         enabled: true

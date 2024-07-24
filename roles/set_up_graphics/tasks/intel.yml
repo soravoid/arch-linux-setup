@@ -1,0 +1,32 @@
+- name: Install mesa package
+  community.general.pacman:
+    name: 
+      - mesa
+      - vulkan-intel
+    state: present
+
+- name: Install 32-bit mesa package
+  community.general.pacman:
+    name:
+      - lib32-mesa
+      - lib32-vulkan-intel
+    state: present
+  when: use_lib32 | bool
+
+- name: Set up Hardware video acceleration for Intel
+  block:
+    - name: Install intel-media-driver 
+      community.general.pacman:
+        name: intel-media-driver
+        state: present
+    - name: Set up environment variables
+      ansible.builtin.blockinfile:
+        path: /etc/environment
+        create: true
+        owner: root
+        group: root
+        mode: '0644'
+        block: |
+          LIBVA_DRIVER_NAME=iHD
+          VDPAU_DRIVER=va_gl
+

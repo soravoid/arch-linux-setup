@@ -1,0 +1,55 @@
+- name: Install NVIDIA proprietary drivers
+  community.general.pacman:
+    name:
+      - nvidia
+      - nvidia-utils
+    state: present
+
+- name: Install 32-bit NVIDIA proprietary drivers
+  community.general.pacman:
+    name: lib32-nvidia-utils
+    state: present
+  when: use_lib32 | bool
+
+- name: Remove kms from mkinitcpio.conf
+  ansible.builtin.lineinfile:
+    path: /etc/mkinitcpio.conf
+    regexp: '^HOOKS=\((.*?) kms (.*?)\)'
+    backrefs: true
+    line: 'HOOKS=(\1 \2)'
+    create: false
+
+- name: Enable NVIDIA DRM
+  ansible.builtin.lineinfile:
+    path: /etc/modprobe.d/nvidia.conf
+    line: options nvidia_drm modeset=1
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable early loading for NVIDIA
+  ansible.builtin.lineinfile:
+    path: /etc/mkinitcpio.conf
+    regexp: '^MODULES=\((.*)\)'
+    line: 'MODULES=(\1 nvidia nvidia_modeset nvidia_uvm nvidia_drm)'
+
+- name: Copy NVIDIA update pacman hook
+  ansible.builtin.copy:
+    src: assets/nvidia.hook
+    dest: /etc/pacman.d/hooks/nvidia.hook
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Configure Hardware video acceleration for NVIDIA
+  ansible.builtin.blockinfile:
+    path: /etc/environment
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
+    block: |
+      LIBVA_DRIVER_NAME=nvidia
+      VDPAU_DRIVER=nvidia
+

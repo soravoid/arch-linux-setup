@@ -112,7 +112,7 @@
         path: /etc/cron.daily/secure-time-sync
         state: link
     - name: Enable cronie systemd service
-      ansible.builtin.systemd:
+      ansible.builtin.systemd_service:
         name: cronie
         enabled: true
         state: started

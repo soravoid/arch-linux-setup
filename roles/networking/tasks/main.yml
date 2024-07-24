@@ -18,7 +18,7 @@
       wifi.backend=iwd
 
 - name: Enable NetworkManager systemd service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: NetworkManager
     enabled: true
     state: started
@@ -32,7 +32,7 @@
     mode: '0644'
 
 - name: Enable macchanger systemd service
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: macchanger
     daemon_reload: true
     enabled: true
@@ -58,6 +58,6 @@
       become: true
       become_user: aur_builder
     - name: Enabling Mullvad VPN systemd service
-      ansible.builtin.systemd:
+      ansible.builtin.systemd_service:
         name: mullvad-daemon
         enabled: true

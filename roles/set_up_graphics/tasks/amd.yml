@@ -1,0 +1,91 @@
+- name: Install mesa
+  community.general.pacman:
+    name:
+      - mesa
+      - vulkan-radeon
+    state: present
+
+- name: Install 32-bit mesa
+  community.general.pacman:
+    name: 
+      - lib32-mesa
+      - lib32-vulkan-radeon
+    state: present
+  when: use_lib32 | bool
+
+- name: Set up Hardware video acceleration
+  block:
+    - name: Install VAAPI and VDPAU drivers
+      community.general.pacman:
+        name:
+          - libva-mesa-driver
+          - mesa-vdpau
+        state: present
+    - name: Install VAAPI and VDPAU drivers (32-bit)
+      community.general.pacman:
+        name:
+          - lib32-libva-mesa-driver
+          - lib32-mesa-vdpau
+        state: present
+      when: use_lib32 | bool
+    - name: Set environment variables
+      ansible.builtin.blockinfile:
+        path: /etc/environment
+        create: true
+        owner: root
+        group: root
+        mode: '0644'
+        block: |
+          LIBVA_DRIVER_NAME=radeonsi
+          VDPAU_DRIVER=radeonsi
+
+  - name: Set up VRAM Eviction Helper
+    block:
+      - name: Install build dependencies
+        community.general.pacman:
+          name:
+            - gcc
+            - meson
+          state: present
+          reason: dependency
+          reason_for: new
+      - name: Install runtime dependencies
+        community.general.pacman:
+          name: libdrm
+          state: present
+      - name: Checkout git repository
+        ansible.builtin.git:
+          repo: https://git.dolansoft.org/lorenz/memreserver.git
+          dest: /root/memreserver
+      - name: Set up Meson build directory
+        ansible.builtin.command: meson setup --prefix=/usr/local --buildtype=release . build
+        args:
+          chdir: /root/memreserver
+      - name: Build memreserver executable
+        ansible.builtin.command: meson compile -C build
+        args:
+          chdir: /root/memreserver
+      - name: Copy memreserver executable to /usr/local/bin
+        ansible.builtin.copy:
+          src: /root/memreserver/build/memreserver
+          dest: /usr/local/bin/memreserver
+          owner: root
+          group: root
+          mode: '0755'
+      - name: Copy memreserver service to user services
+        ansible.builtin.copy:
+          src: /root/memreserver/memreserver.service
+          dest: /home/user/.config/systemd/user/memreserver.service
+          owner: user
+          group: user
+          mode: '0644'
+      - name: Enable memreserver systemd user service
+        ansible.builtin.systemd_service:
+          name: memreserver
+          daemon_reload: true
+          enabled: true
+          scope: user
+      - name: Remove build files
+        ansible.builtin.file:
+          path: /root/memreserver
+          state: absent
