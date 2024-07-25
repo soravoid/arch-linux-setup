@@ -12,12 +12,18 @@
           - wireplumber
           - pipewire-audio
         state: present
+    - name: Install paru from AUR
+      kewlfft.aur.aur:
+        name: paru
+        use: makepkg
+        state: present
     - name: Install packages from AUR
       kewlfft.aur.aur:
         name:
           - webcord
           - anki
           - informant
+        use: paru
         state: present
 
 - name: Enable pipewire service
@@ -41,5 +47,5 @@
 
 - name: Set up AstroNvim config
   ansible.builtin.git:
-    repo: gitea@git.jaden.rs:suusuu/astronvim-user-config.git
+    repo: https://github.com/soravoid/astronvim-user-config.git
     separate_git_dir: /home/user/.config/nvim
