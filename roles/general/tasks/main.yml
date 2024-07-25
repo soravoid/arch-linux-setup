@@ -51,4 +51,4 @@
 - name: Set up AstroNvim config
   ansible.builtin.git:
     repo: https://github.com/soravoid/astronvim-user-config.git
-    separate_git_dir: /home/user/.config/nvim
+    dest: /home/user/.config/nvim
