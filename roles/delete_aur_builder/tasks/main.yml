@@ -3,6 +3,9 @@
     path: /etc/sudoers.d/11-install-aur_builder
     state: absent
 
+- name: Kill all processes belonging to aur_builder
+  ansible.builtin.shell: pkill -u aur_builder
+
 - name: Delete 'aur_builder' user
   ansible.builtin.user:
     name: aur_builder
