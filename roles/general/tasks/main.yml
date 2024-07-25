@@ -48,6 +48,9 @@
     update_cache: true
   when: use_lib32|bool
 
+- name: Create .config directory
+  ansible.builtin.shell: mkdir -p /home/user/.config/nvim
+
 - name: Set up AstroNvim config
   ansible.builtin.git:
     repo: https://github.com/soravoid/astronvim-user-config.git
