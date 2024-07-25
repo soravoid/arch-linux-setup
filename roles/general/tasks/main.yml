@@ -42,6 +42,7 @@
     name:
       - lib32-pipewire
     state: present
+    update_cache: true
   when: use_lib32|bool
 
 - name: Set up AstroNvim config
