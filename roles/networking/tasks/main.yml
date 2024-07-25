@@ -52,7 +52,7 @@
   block:
     - name: Installing Mullvad VPN...
       kewlfft.aur.aur:
-        name: mullvad-vpn
+        name: mullvad-vpn-bin
         state: present
         use: paru
       become: true
