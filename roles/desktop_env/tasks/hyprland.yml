@@ -11,7 +11,19 @@
       - hypridle
       - hyprlock
       - hyprcursor
+      - dolphin
     state: present
+
+- name: Ensure hyprland config directory exists
+  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/hypr
+
+- name: Copy hyprland config file
+  ansible.builtin.copy:
+    src: assets/hyprland.conf
+    dest: /home/user/.config/hypr/hyprland.conf
+    owner: user
+    group: user
+    mode: '0644'
 
 - name: Copy anyrun config files
   ansible.builtin.copy:
@@ -50,16 +62,3 @@
         path: /home/user/.config/hypr/hyprland.conf
         create: no
 
-- name: Set up mako notification daemon
-  ansible.builtin.lineinfile:
-    path: /home/user/.config/hypr/hyprland.conf
-    line: 'exec-once=mako'
-    create: true
-    owner: user
-    group: user
-    mode: '0644'
-
-- name: Set up polkit auth agent
-  ansible.builtin.lineinfile:
-    path: /home/user/.config/hypr/hyprland.conf
-    line: 'exec-once=/usr/lib/polkit-kde-authentication-agent-1'
