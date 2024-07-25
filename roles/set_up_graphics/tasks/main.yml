@@ -10,16 +10,22 @@
 
 - name: Include appropriate role
   block:
-    - name: Include NVIDIA GPU graphics setup
-      ansible.builtin.include_tasks: nvidia.yml
-      ansible.builtin.set_fact: nvidia=true
+    - block:
+        - name: Set nvidia fact to true
+          ansible.builtin.set_fact: nvidia=true
+        - name: Include NVIDIA GPU graphics setup
+          ansible.builtin.include_tasks: nvidia.yml
       when: '"nvidia" in lspci_output.stdout|lower'
-    - name: Include Intel graphics setup
-      ansible.builtin.include_tasks: intel.yml
-      ansible.builtin.set_fact: intel=true
+    - block:
+        - name: Set intel fact to true
+          ansible.builtin.set_fact: intel=true
+        - name: Include Intel graphics setup
+          ansible.builtin.include_tasks: intel.yml
       when: '"intel" in lspci_output.stdout|lower'
-    - name: Include AMD GPU graphics setup
-      ansible.builtin.include_tasks: amd.yml
-      ansible.builtin.set_fact: amd=true
+    - block:
+        - name: Set amd fact to true
+          ansible.builtin.set_fact: amd=true
+        - name: Include AMD GPU graphics setup
+          ansible.builtin.include_tasks: amd.yml
       when: '"advanced micro devices" in lspci_output.stdout|lower'
 
