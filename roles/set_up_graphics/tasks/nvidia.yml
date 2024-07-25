@@ -58,7 +58,7 @@
     line: 'MODULES=(\1 nvidia nvidia_modeset nvidia_uvm nvidia_drm)'
 
 - name: Ensure pacman hooks folder exists
-  ansible.builtin.shell: mkdir -p /etc/pacman.hooks
+  ansible.builtin.shell: mkdir -p /etc/pacman.d/hooks
 
 - name: Copy NVIDIA update pacman hook
   ansible.builtin.copy:
