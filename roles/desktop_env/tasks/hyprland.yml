@@ -21,6 +21,7 @@
       - nordzy-cursors-hyprcursor
       - anyrun-git
     state: present
+    use: paru
 
 - name: Set up NVIDIA for Hyprland
   when: nvidia
