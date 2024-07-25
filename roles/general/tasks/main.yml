@@ -23,7 +23,7 @@
       kewlfft.aur.aur:
         name:
           - webcord
-          - anki
+          - anki-bin
           - informant
         use: paru
         state: present
