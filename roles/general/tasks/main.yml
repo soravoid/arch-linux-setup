@@ -30,6 +30,9 @@
       become: yes
       become_user: aur_builder
 
+- name: Read informant messages
+  ansible.builtin.shell: informant read --all
+
 - name: Enable multilib repository
   ansible.builtin.replace:
     path: /etc/pacman.conf
