@@ -87,6 +87,8 @@
         daemon_reload: true
         enabled: true
         scope: user
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/1000"
     - name: Remove build files
       ansible.builtin.file:
         path: /root/memreserver
