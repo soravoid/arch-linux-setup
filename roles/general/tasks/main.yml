@@ -17,6 +17,8 @@
         name: paru
         use: makepkg
         state: present
+      become: yes
+      become_user: aur_builder
     - name: Install packages from AUR
       kewlfft.aur.aur:
         name:
@@ -25,6 +27,8 @@
           - informant
         use: paru
         state: present
+      become: yes
+      become_user: aur_builder
 
 - name: Enable pipewire service
   ansible.builtin.systemd_service:
