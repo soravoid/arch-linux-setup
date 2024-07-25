@@ -49,7 +49,9 @@
   when: use_lib32|bool
 
 - name: Create .config directory
-  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/nvim
+  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/
 
 - name: Set up AstroNvim config
   ansible.builtin.shell: sudo -u user git clone https://github.com/soravoid/astronvim-user-config.git /home/user/.config/nvim
+  args:
+    creates: /home/user/.config/nvim
