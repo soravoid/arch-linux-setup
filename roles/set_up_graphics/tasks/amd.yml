@@ -82,13 +82,12 @@
         group: user
         mode: '0644'
     - name: Enable memreserver systemd user service
-      ansible.builtin.systemd_service:
-        name: memreserver
-        daemon_reload: true
-        enabled: true
-        scope: user
-      environment:
-        XDG_RUNTIME_DIR: "/run/user/1000"
+      ansible.builtin.file:
+        path: /home/user/.config/systemd/user/sleep.target.wants/memreserver.service
+        src: /home/user/.config/systemd/user/memreserver.service
+        state: link
+        owner: user
+        group: user
     - name: Remove build files
       ansible.builtin.file:
         path: /root/memreserver
