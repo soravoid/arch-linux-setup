@@ -30,11 +30,6 @@
       become: yes
       become_user: aur_builder
 
-- name: Enable pipewire service
-  ansible.builtin.systemd_service:
-    name: pipewire
-    enabled: true
-
 - name: Enable multilib repository
   ansible.builtin.replace:
     path: /etc/pacman.conf
