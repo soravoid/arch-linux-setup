@@ -8,8 +8,8 @@
       prompt: Desktop Environment? (hyprland/kde) 
       private: false
   roles:
-    - create_aur_builder
     - set_up_users
+    - create_aur_builder
     - general
     - networking
     - security
