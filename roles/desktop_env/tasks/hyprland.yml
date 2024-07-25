@@ -46,6 +46,10 @@
   ansible.builtin.lineinfile:
     path: /home/user/.config/hypr/hyprland.conf
     line: 'exec-once=mako'
+    create: true
+    owner: user
+    group: user
+    mode: '0644'
 
 - name: Set up polkit auth agent
   ansible.builtin.lineinfile:
