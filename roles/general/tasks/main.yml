@@ -52,6 +52,4 @@
   ansible.builtin.shell: mkdir -p /home/user/.config/nvim
 
 - name: Set up AstroNvim config
-  ansible.builtin.git:
-    repo: https://github.com/soravoid/astronvim-user-config.git
-    dest: /home/user/.config/nvim
+  ansible.builtin.shell: sudo -u user git clone https://github.com/soravoid/astronvim-user-config.git /home/user/.config/nvim
