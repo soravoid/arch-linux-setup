@@ -10,10 +10,10 @@
   roles:
     - create_aur_builder
     - set_up_users
+    - general
     - networking
     - security
     - performance
-    - general
     - set_up_graphics
     - desktop_env
     - delete_aur_builder
