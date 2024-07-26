@@ -37,8 +37,8 @@
 
 - name: Copy anyrun config files
   ansible.builtin.copy:
-    src: /etc/anyrun
-    dest: /home/user/.config/anyrun
+    src: /etc/anyrun/
+    dest: /home/user/.config/anyrun/
     owner: user
     group: user
 
