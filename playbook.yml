@@ -10,11 +10,11 @@
   roles:
     - set_up_users
     - create_aur_builder
+    - performance
     - general
     - set_up_terminal
     - networking
     - security
-    - performance
     - set_up_graphics
     - desktop_env
     - delete_aur_builder
