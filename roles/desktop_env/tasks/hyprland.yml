@@ -14,6 +14,16 @@
       - dolphin
     state: present
 
+- name: Install hyprland AUR packages
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - nordzy-cursors-hyprcursor
+      - anyrun-git
+    state: present
+    use: paru
+
 - name: Ensure hyprland config directory exists
   ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/hypr
 
@@ -31,16 +41,6 @@
     dest: /home/user/.config/anyrun
     owner: user
     group: user
-
-- name: Install hyprland AUR packages
-  become: true
-  become_user: aur_builder
-  kewlfft.aur.aur:
-    name:
-      - nordzy-cursors-hyprcursor
-      - anyrun-git
-    state: present
-    use: paru
 
 - name: Set up NVIDIA for Hyprland
   when: nvidia
