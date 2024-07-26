@@ -4,7 +4,7 @@
       - kitty
       - fzf
       - zsh
-      - fuck
+      - thefuck
       - fastfetch
     state: present
 
