@@ -11,6 +11,7 @@
     - set_up_users
     - create_aur_builder
     - general
+    - set_up_terminal
     - networking
     - security
     - performance

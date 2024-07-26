@@ -1,0 +1,7 @@
+font_family MesloLGM NF
+
+remember_window_size  no
+initial_window_width  950
+initial_window_height 550
+
+include ./Duotone_Dark.conf

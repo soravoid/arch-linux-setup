@@ -1,0 +1,53 @@
+- name: Install kitty terminal
+  community.general.pacman:
+    name:
+      - kitty
+      - fzf
+      - zsh
+      - fuck
+      - fastfetch
+    state: present
+
+- name: Install terminal packages from AUR
+  kewlfft.aur.aur:
+    name: 
+      - oh-my-posh
+      - zsh-vi-mode
+      - zsh-fast-syntax-highlighting
+      - zsh-autosuggestions
+    state: present
+  become: true
+  become_user: aur_builder
+
+- name: Ensure kitty config folder exists
+  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/kitty
+
+- name: Ensure oh-my-posh config folder exists
+  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/oh-my-posh
+
+- name: Download Duotone Dark kitty theme
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/dexpota/kitty-themes/master/themes/Duotone_Dark.conf
+    dest: /home/user/.config/kitty/Duotone_Dark.conf
+    owner: user
+    group: user
+    mode: '0644'
+
+- name: Download velvet oh-my-posh theme
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/velvet.omp.json
+    dest: /home/user/.config/oh-my-posh/velvet.omp.json
+    owner: user
+    group: user
+    mode: '0644'
+
+- name: Install Meslo Nerd Fonts
+  ansible.builtin.shell: sudo -u user oh-my-posh font install meslo
+
+- name: Moving .zshrc to user home
+  ansible.builtin.copy:
+    src: assets/zshrc_file
+    dest: /home/user/.zshrc
+    owner: user
+    group: user
+    mode: '0644'
