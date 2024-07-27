@@ -1,5 +1,4 @@
-#!/usr/bin/python
-
+#!/usr/bin/env python3
 """
 Move all environment variables from /etc/environment to hyprland.conf
 
@@ -39,8 +38,28 @@ def main(home_dir: Path, check_mode: bool) -> int:
     with etc_env.open("w") as f:
         f.writelines(non_envvars)
 
-    with hyprland_conf.open("a") as f:
-        f.writelines(f"env = {name},{value}" for name, value in envvars)
+    with hyprland_conf.open("r") as f:
+        contents = f.readlines()
+
+    last_env: int | None = None
+    found_env = False
+    for i, line in enumerate(contents):
+        if "env" in line:
+            if not found_env:
+                found_env = True
+        elif found_env:
+            last_env = i
+            break
+
+    if last_env is None:
+        print("Could not find environment variables block, appending to EOF")
+        with hyprland_conf.open("a") as f:
+            f.writelines(f"env = {name},{value}" for name, value in envvars)
+    else:
+        for k, var in enumerate([f"env = {name},{value}" for name, value in envvars]):
+            contents.insert(i + k, var)
+        with hyprland_conf.open("w") as f:
+            f.writelines(contents)
         
     return 0
 
