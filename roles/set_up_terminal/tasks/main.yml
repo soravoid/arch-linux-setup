@@ -43,8 +43,8 @@
 
 - name: Download velvet oh-my-posh theme
   ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/velvet.omp.json
-    dest: /home/user/.config/oh-my-posh/velvet.omp.json
+    url: https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/cert.omp.json
+    dest: /home/user/.config/oh-my-posh/cert.omp.json
     owner: user
     group: user
     mode: '0644'
