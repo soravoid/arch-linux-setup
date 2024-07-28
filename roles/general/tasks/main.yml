@@ -32,16 +32,20 @@
       when: use_lib32|bool
 
 - name: Set up AstroNvim config
-  ansible.builtin.shell: sudo -u user git clone https://github.com/soravoid/astronvim-user-config.git /home/user/.config/nvim
+  ansible.builtin.command: sudo -u user git clone https://github.com/soravoid/astronvim-user-config.git /home/user/.config/nvim
   args:
     creates: /home/user/.config/nvim
 
 - name: Set up UFW
   block:
     - name: Set UFW to default deny all incoming traffic
-      ansible.builtin.shell: ufw default deny
+      ansible.builtin.command: ufw default deny
+      register: ufw_deny_out
+      changed_when: ufw_deny_out.rc != 0
     - name: Enable UFW firewall
-      ansible.builtin.shell: ufw --force enable
+      ansible.builtin.command: ufw --force enable
+      register: ufw_enable_out
+      changed_when: ufw_enable_out.rc != 0
     - name: Enable UFW systemd service
       ansible.builtin.systemd_service:
         name: ufw

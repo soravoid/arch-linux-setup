@@ -4,7 +4,9 @@
     state: absent
 
 - name: Kill all processes belonging to aur_builder
-  ansible.builtin.shell: pkill -u aur_builder
+  ansible.builtin.command: pkill -u aur_builder
+  register: pkill_output
+  changed_when: pkill_output.rc == 0
 
 - name: Delete 'aur_builder' user
   ansible.builtin.user:

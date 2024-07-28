@@ -1,3 +1,3 @@
 - name: Include steam task if multilib repo is enabled
-  ansible.builtin.include_task: steam.yml
+  ansible.builtin.include_tasks: steam.yml
   when: use_lib32|bool

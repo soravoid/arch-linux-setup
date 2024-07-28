@@ -120,7 +120,12 @@
 - name: Prevent core dumps
   block:
     - name: Ensure systemd coredump directory exists
-      ansible.builtin.shell: mkdir -p /etc/systemd/coredump.conf.d
+      ansible.builtin.file:
+        path: /etc/systemd/system/coredump.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
     - name: Prevent systemd from core dumping
       ansible.builtin.copy:
         dest: /etc/systemd/coredump.conf.d/disable.conf

@@ -20,4 +20,9 @@
     password_lock: true
 
 - name: Ensure user .config dir exists
-  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/
+  ansible.builtin.file:
+    path: /home.user/config
+    state: directory
+    owner: user
+    group: user
+    mode: '0700'

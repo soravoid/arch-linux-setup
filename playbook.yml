@@ -2,10 +2,10 @@
   hosts: localhost
   vars_prompt:
     - name: use_lib32
-      prompt: Include multilib repository? (true/false) 
+      prompt: "Include multilib repository? (true/false) "
       private: false
     - name: desktop_env_choice
-      prompt: Desktop Environment? (hyprland/kde) 
+      prompt: "Desktop Environment? (hyprland/kde) "
       private: false
   roles:
     - set_up_users

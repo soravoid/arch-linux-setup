@@ -7,7 +7,7 @@
 
 - name: Install 32-bit mesa
   community.general.pacman:
-    name: 
+    name:
       - lib32-mesa
       - lib32-vulkan-radeon
     state: present
@@ -31,14 +31,14 @@
     - name: Set environment variables
       ansible.builtin.lineinfile:
         path: /etc/environment
-        line: {{ item }}
+        line: '{{ item }}'
         create: true
         owner: root
         group: root
         mode: '0644'
-        loop:
-         - LIBVA_DRIVER_NAME=radeonsi
-         - VDPAU_DRIVER=radeonsi
+      loop:
+        - LIBVA_DRIVER_NAME=radeonsi
+        - VDPAU_DRIVER=radeonsi
 
 - name: Set up VRAM Eviction Helper
   block:
@@ -55,17 +55,19 @@
         name: libdrm
         state: present
     - name: Checkout git repository
-      ansible.builtin.git:
+      ansible.builtin.git:  # noqa: latest
         repo: https://git.dolansoft.org/lorenz/memreserver.git
         dest: /root/memreserver
     - name: Set up Meson build directory
-      ansible.builtin.command: meson setup --prefix=/usr/local --buildtype=release . build
+      ansible.builtin.command: meson setup --buildtype=release . build
       args:
         chdir: /root/memreserver
+        creates: /root/memserver/build
     - name: Build memreserver executable
       ansible.builtin.command: meson compile -C build
       args:
         chdir: /root/memreserver
+        creates: /root/memserver/build/memserver
     - name: Copy memreserver executable to /usr/local/bin
       ansible.builtin.copy:
         src: /root/memreserver/build/memreserver
@@ -74,7 +76,12 @@
         group: root
         mode: '0755'
     - name: Ensure systemd user directory exists
-      ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/systemd/user/sleep.target.wants
+      ansible.builtin.file:
+        path: /home/user/.config/systemd/user/sleep.target.wants
+        state: directory
+        owner: user
+        group: user
+        mode: '0755'
     - name: Copy memreserver service to user services
       ansible.builtin.copy:
         src: /root/memreserver/memreserver.service

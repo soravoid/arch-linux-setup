@@ -25,7 +25,12 @@
     use: paru
 
 - name: Ensure hyprland config directory exists
-  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/hypr
+  ansible.builtin.file:
+    path: /home/user/.config/hypr
+    state: directory
+    owner: user
+    group: user
+    mode: '0755'
 
 - name: Copy hyprland config file
   ansible.builtin.copy:
@@ -35,12 +40,21 @@
     group: user
     mode: '0644'
 
+- name: Make anyrun config directory
+  ansible.builtin.file:
+    path: /home/user/.config/anyrun
+    state: directory
+    owner: user
+    group: user
+    mode: '0755'
+
 - name: Copy anyrun config files
   ansible.builtin.copy:
     src: /etc/anyrun/
     dest: /home/user/.config/anyrun/
     owner: user
     group: user
+    mode: preserve
 
 - name: Set up NVIDIA for Hyprland
   when: nvidia
@@ -50,15 +64,14 @@
         name: egl-wayland
         state: present
     - name: Move environment variables to hyprland.conf
-      ansible.builtin.shell: ./hyprland_envvars.py /home/user
+      ansible.builtin.script: ./hyprland_envvars.py /home/user
       args:
         chdir: assets
     - name: Add cursor block to hyprland.conf
       ansible.builtin.blockinfile:
         path: /home/user/.config/hypr/hyprland.conf
-        create: no
+        create: false
         block: |
           cursor {
               no_hardware_cursors = true
           }
-

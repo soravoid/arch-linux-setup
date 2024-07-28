@@ -8,9 +8,12 @@
 - name: Ensure en_US.UTF-8 locale is generated
   block:
     - name: Check available locales
-      ansible.builtin.shell: locale -a
+      ansible.builtin.command: locale -a
       register: locale_list
-    - block:
+      changed_when: false
+    - name: Generate en_US.UTF-8 locale
+      when: not "en_US.utf8" in locale_list.stdout
+      block:
         - name: Uncomment en_US.UTF-8 in locale.gen
           ansible.builtin.lineinfile:
             path: /etc/locale.gen
@@ -18,8 +21,8 @@
             backrefs: true
             line: '\1'
         - name: Generate locale
-          ansible.builtin.shell: locale-gen
-      when: "en_US.utf8" not in locale_list.stdout
+          ansible.builtin.command: locale-gen
+          changed_when: true
 
 - name: Install OpenGL graphics drivers
   block:

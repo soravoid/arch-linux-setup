@@ -1,9 +1,8 @@
 - name: Install desktop environment
   block:
     - name: Install KDE
-      include_tasks: kde.yml
+      ansible.builtin.include_tasks: kde.yml
       when: desktop_env_choice == 'kde'
     - name: Install Hyprland
-      include_tasks: hyprland.yml
+      ansible.builtin.include_tasks: hyprland.yml
       when: desktop_env_choice != 'kde'
-

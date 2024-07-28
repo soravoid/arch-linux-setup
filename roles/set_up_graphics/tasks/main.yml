@@ -5,27 +5,35 @@
     intel: false
 
 - name: Check GPU type
-  ansible.builtin.shell: lspci | grep -E "(VGA|3D)"
+  ansible.builtin.shell: |
+    set -o pipefail
+    lspci | grep -E "(VGA|3D)"
   register: lspci_output
+  changed_when: false
 
-- name: Include appropriate role
+- name: Set up NVIDIA graphics
+  when: '"nvidia" in lspci_output.stdout|lower'
   block:
-    - block:
-        - name: Set nvidia fact to true
-          ansible.builtin.set_fact: nvidia=true
-        - name: Include NVIDIA GPU graphics setup
-          ansible.builtin.include_tasks: nvidia.yml
-      when: '"nvidia" in lspci_output.stdout|lower'
-    - block:
-        - name: Set intel fact to true
-          ansible.builtin.set_fact: intel=true
-        - name: Include Intel graphics setup
-          ansible.builtin.include_tasks: intel.yml
-      when: '"intel" in lspci_output.stdout|lower'
-    - block:
-        - name: Set amd fact to true
-          ansible.builtin.set_fact: amd=true
-        - name: Include AMD GPU graphics setup
-          ansible.builtin.include_tasks: amd.yml
-      when: '"advanced micro devices" in lspci_output.stdout|lower'
+    - name: Set nvidia fact to true
+      ansible.builtin.set_fact:
+        nvidia: true
+    - name: Include NVIDIA GPU graphics setup
+      ansible.builtin.include_tasks: nvidia.yml
 
+- name: Set up Intel graphics
+  when: '"intel" in lspci_output.stdout|lower'
+  block:
+    - name: Set intel fact to true
+      ansible.builtin.set_fact:
+        intel: true
+    - name: Include Intel graphics setup
+      ansible.builtin.include_tasks: intel.yml
+
+- name: Set up AMD graphics
+  when: '"advanced micro devices" in lspci_output.stdout|lower'
+  block:
+    - name: Set amd fact to true
+      ansible.builtin.set_fact:
+        amd: true
+    - name: Include AMD GPU graphics setup
+      ansible.builtin.include_tasks: amd.yml

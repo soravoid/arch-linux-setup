@@ -4,10 +4,13 @@
     state: present
 
 - name: Create 'default' firefox profile
-  ansible.builtin.shell: sudo -u user firefox --headless -CreateProfile default
+  ansible.builtin.command: sudo -u user firefox --headless -CreateProfile default
+  register: firefox_profile_out
+  args:
+    creates: /home/user/.mozilla/firefox/*.default
 
 - name: Find firefox profile folder
-  ansible.builtin.shell: ./find_firefox_profile.py default /home/user/.mozilla/firefox
+  ansible.builtin.script: ./find_firefox_profile.py default /home/user/.mozilla/firefox
   register: firefox_profile
   args:
     chdir: assets
@@ -30,9 +33,11 @@
     mode: '0644'
 
 - name: Update profile with arkenfox scripts
-  ansible.builtin.shell: sudo -u user arkenfox-updater -p {{ firefox_profile.stdout }}
+  ansible.builtin.command: sudo -u user arkenfox-updater -p {{ firefox_profile.stdout }}
   args:
     chdir: '{{ firefox_profile.stdout }}'
+  register: arkenfox_out
+  changed_when: arkenfox_out.rc == 0
 
 - name: Copy firefox profiles.ini
   ansible.builtin.template:
@@ -43,7 +48,7 @@
     mode: '0644'
 
 - name: Find default-release firefox profile folder
-  ansible.builtin.shell: ./find_firefox_profile.py default-release /home/user/.mozilla/firefox
+  ansible.builtin.script: ./find_firefox_profile.py default-release /home/user/.mozilla/firefox
   register: firefox_default_release
   args:
     chdir: assets

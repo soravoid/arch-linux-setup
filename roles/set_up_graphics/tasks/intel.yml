@@ -1,6 +1,6 @@
 - name: Install mesa package
   community.general.pacman:
-    name: 
+    name:
       - mesa
       - vulkan-intel
     state: present
@@ -15,7 +15,7 @@
 
 - name: Set up Hardware video acceleration for Intel
   block:
-    - name: Install intel-media-driver 
+    - name: Install intel-media-driver
       community.general.pacman:
         name: intel-media-driver
         state: present
@@ -26,8 +26,7 @@
         owner: root
         group: root
         mode: '0644'
-        line: {{ item }} 
-        loop:
-         - LIBVA_DRIVER_NAME=iHD
-         - VDPAU_DRIVER=va_gl
-
+        line: '{{ item }}'
+      loop:
+        - LIBVA_DRIVER_NAME=iHD
+        - VDPAU_DRIVER=va_gl

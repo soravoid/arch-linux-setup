@@ -10,7 +10,7 @@
 
 - name: Install terminal packages from AUR
   kewlfft.aur.aur:
-    name: 
+    name:
       - oh-my-posh
       - zsh-vi-mode
       - zsh-fast-syntax-highlighting
@@ -20,10 +20,20 @@
   become_user: aur_builder
 
 - name: Ensure kitty config folder exists
-  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/kitty
+  ansible.builtin.file:
+    path: /home/user/.config/kitty
+    state: directory
+    owner: user
+    group: user
+    mode: '0755'
 
 - name: Ensure oh-my-posh config folder exists
-  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/oh-my-posh
+  ansible.builtin.file:
+    path: /home/user/.config/oh-my-posh
+    state: directory
+    owner: user
+    group: user
+    mode: '0755'
 
 - name: Copy kitty.conf file
   ansible.builtin.copy:
@@ -50,7 +60,9 @@
     mode: '0644'
 
 - name: Install Meslo Nerd Fonts
-  ansible.builtin.shell: sudo -u user oh-my-posh font install meslo
+  ansible.builtin.command: sudo -u user oh-my-posh font install meslo
+  args:
+    creates: /home/user/.local/share/fonts/meslolgm-nerf-font*
 
 - name: Moving .zshrc to user home
   ansible.builtin.copy:

@@ -14,8 +14,16 @@
   become: true
   become_user: aur_builder
 
+- name: Add admin to informant group
+  ansible.builtin.user:
+    name: admin
+    groups: ["informant"]
+    append: true
+
 - name: Read informant messages
-  ansible.builtin.shell: informant read --all
+  ansible.builtin.command: informant read --all
+  register: informant_output
+  changed_when: informant_output.rc == 0
 
 - name: Enable multilib repository
   ansible.builtin.replace:

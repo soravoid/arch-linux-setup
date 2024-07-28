@@ -58,7 +58,12 @@
     line: 'MODULES=(\1 nvidia nvidia_modeset nvidia_uvm nvidia_drm)'
 
 - name: Ensure pacman hooks folder exists
-  ansible.builtin.shell: mkdir -p /etc/pacman.d/hooks
+  ansible.builtin.file:
+    path: /etc/pacman.d/hooks
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
 
 - name: Copy NVIDIA update pacman hook
   ansible.builtin.copy:
@@ -75,8 +80,7 @@
     owner: root
     group: root
     mode: '0644'
-    line: {{ item }}
+    line: '{{ item }}'
   loop:
     - LIBVA_DRIVER_NAME=nvidia
     - VDPAU_DRIVER=nvidia
-
