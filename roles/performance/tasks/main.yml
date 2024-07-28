@@ -8,7 +8,7 @@
     - name: Change CFLAGS
       ansible.builtin.lineinfile:
         path: /etc/makepkg.conf
-        regexp: '(?m)^CFLAGS="(?!-march=native)-march=.+?(?:\s+-mtune=.+?)?\s+(.*)$'
+        regexp: '(?m)^CFLAGS="(?!-march=native)-march=.+?(?:\s+-mtune=.+?)?\s+?(.*)$'
         backrefs: true
         line: 'CFLAGS="-march=native \1'
     - name: Change LDFLAGS
