@@ -1,0 +1,84 @@
+- name: Clone selinux from archhardened repo  # noqa: latest
+  ansible.builtin.git:
+    repo: https://github.com/archlinuxhardened/selinux.git
+    dest: /root/selinux
+
+- name: Get SELinux GPG keys
+  ansible.builtin.command: ./recv_gpg_keys.sh
+  register: gpg_output
+  args:
+    chdir: /root/selinux
+  changed_when: gpg_output.rc == 0
+
+- name: Enable SELinux arch repo
+  ansible.builtin.blockinfile:
+    path: /etc/pacman.conf
+    block: |
+      [selinux]
+      Server = https://github.com/archlinuxhardened/selinux/releases/download/ArchLinux-SELinux
+      SigLevel = Never
+
+- name: Build and install SELinux
+  ansible.builtin.command: ./build_and_install_all.sh
+  register: selinux_out
+  args:
+    chdir: /root/selinux
+  changed_when: selinux_out.rc == 0
+
+- name: Delete selinux build files
+  ansible.builtin.file:
+    path: /root/selinux
+    state: absent
+
+- name: Change lsm kernel parameter
+  ansible.builtin.lineinfile:
+    path: assets/boot_hardening.conf
+    line: lsm=landlock,lockdown,yama,integrity,selinux,bpf
+
+- name: Ensure proper login security context with PAM
+  block:
+    - name: Set close rule
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/system-login
+        regexp: '(?m)session\s+required\s+pam_selinux\.so\s+close'
+        line: 'session         required        pam_selinux.so close'
+    - name: Set open rule
+      ansible.builtin.lineinfile:
+        path: /etc/pam.d/system-login
+        regexp: '(?m)session\s+required\s+pam_selinux\.so\s+open'
+        line: 'session         required        pam_selinux.so open'
+
+- name: Download SELinux refpolicy
+  kewlfft.aur.aur:
+    name: selinux-refpolicy-src
+    state: present
+  become: true
+  become_user: aur_builder
+
+- name: Set SELinux policy
+  ansible.builtin.lineinfile:
+    path: /etc/selinux/config
+    regexp: '(?m)^SELINUXTYPE='
+    line: 'SELINUXTYPE=refpolicy-git'
+
+- name: Make SELinux policy patch
+  ansible.builtin.command: '{{ item.cmd }}'
+  with_items:
+    - cmd: 'checkmodule -m -o requiredmod.mod requiredmod.te'
+      result_file: 'requiredmod.mod'
+    - cmd: 'semodule_package -o requiredmod.pp -m requiredmod.mod'
+      result_file: 'requiredmod.pp'
+  args:
+    chdir: assets
+    creates: '{{ item.result_file }}'
+
+- name: Install SELinux policy patch
+  ansible.builtin.command: 'semodule -i requiredmod.pp'
+  args:
+    chdir: assets
+  register: patch_out
+  changed_when: patch_out.rc == 0
+
+- name: Remind user to reboot and run command for SELinux
+  ansible.builtin.debug:
+    msg: 'After this playbook finishes, reboot and run `restorecon -r /` as root'

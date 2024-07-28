@@ -121,7 +121,7 @@
   block:
     - name: Ensure systemd coredump directory exists
       ansible.builtin.file:
-        path: /etc/systemd/system/coredump.conf.d
+        path: /etc/systemd/coredump.conf.d
         state: directory
         owner: root
         group: root
