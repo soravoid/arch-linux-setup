@@ -42,11 +42,11 @@
     - name: Set UFW to default deny all incoming traffic
       ansible.builtin.command: ufw default deny
       register: ufw_deny_out
-      changed_when: ufw_deny_out.rc != 0
+      changed_when: ufw_deny_out.rc == 0
     - name: Enable UFW firewall
       ansible.builtin.command: ufw --force enable
       register: ufw_enable_out
-      changed_when: ufw_enable_out.rc != 0
+      changed_when: ufw_enable_out.rc == 0
     - name: Enable UFW systemd service
       ansible.builtin.systemd_service:
         name: ufw
