@@ -19,4 +19,5 @@
     - security
     - set_up_graphics
     - desktop_env
+    - set_up_steam
     - delete_aur_builder

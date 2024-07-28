@@ -1,0 +1,70 @@
+- name: Install Steam and other packages
+  community.general.pacman:
+    name:
+      - steam
+      - ttf-liberation
+    state: present
+
+- name: Ensure en_US.UTF-8 locale is generated
+  block:
+    - name: Check available locales
+      ansible.builtin.shell: locale -a
+      register: locale_list
+    - block:
+        - name: Uncomment en_US.UTF-8 in locale.gen
+          ansible.builtin.lineinfile:
+            path: /etc/locale.gen
+            regexp: '(?m)^#(en_US\.UTF-8 UTF-8)'
+            backrefs: true
+            line: '\1'
+        - name: Generate locale
+          ansible.builtin.shell: locale-gen
+      when: "en_US.utf8" not in locale_list.stdout
+
+- name: Install OpenGL graphics drivers
+  block:
+    - name: Install drivers for NVIDIA
+      community.general.pacman:
+        name:
+          - nvidia-utils
+          - lib32-nvidia-utils
+        state: present
+      when: nvidia
+    - name: Install drivers for AMD
+      community.general.pacman:
+        name:
+          - mesa
+          - lib32-mesa
+        state: present
+      when: amd
+    - name: Install drivers for Intel
+      community.general.pacman:
+        name:
+          - mesa
+          - lib32-mesa
+        state: present
+      when: intel
+
+- name: Configure Vulkan
+  block:
+    - name: Install Vulkan packages
+      community.general.pacman:
+        name:
+          - vulkan-icd-loader
+          - lib32-vulkan-icd-loader
+        state: present
+    # NVIDIA Vulkan packages are same as OpenGL drivers
+    - name: Install drivers for AMD
+      community.general.pacman:
+        name:
+          - vulkan-radeon
+          - lib32-vulkan-radeon
+        state: present
+      when: amd
+    - name: Install drivers for Intel
+      community.general.pacman:
+        name:
+          - vulkan-intel
+          - lib32-vulkan-intel
+        state: present
+      when: intel
