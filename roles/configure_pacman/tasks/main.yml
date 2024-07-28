@@ -1,0 +1,25 @@
+- name: Install paru from AUR
+  kewlfft.aur.aur:
+    name: paru
+    use: makepkg
+    state: present
+  become: true
+  become_user: aur_builder
+
+- name: Install informant from AUR with paru
+  kewlfft.aur.aur:
+    name: informant
+    state: present
+    use: paru
+      become: true
+      become_user: aur_builder
+
+- name: Read informant messages
+  ansible.builtin.shell: informant read --all
+
+- name: Enable multilib repository
+  ansible.builtin.replace:
+    path: /etc/pacman.conf
+    regexp: '(?m)^#(\[multilib\])$\n#(Include = \/etc\/pacman\.d\/mirrorlist)$'
+    replace: '\1\n\2'
+  when: use_lib32|bool

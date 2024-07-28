@@ -11,8 +11,10 @@
     - set_up_users
     - create_aur_builder
     - performance
+    - configure_pacman
     - general
     - set_up_terminal
+    - set_up_browser
     - networking
     - security
     - set_up_graphics

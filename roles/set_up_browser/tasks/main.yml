@@ -1,0 +1,64 @@
+- name: Install firefox
+  community.general.pacman:
+    name: firefox
+    state: present
+
+- name: Create 'default' firefox profile
+  ansible.builtin.shell: sudo -u user firefox --headless -CreateProfile default
+
+- name: Find firefox profile folder
+  ansible.builtin.shell: ./find_firefox_profile.py default /home/user/.mozilla/firefox
+  register: firefox_profile
+  args:
+    chdir: assets
+  failed_when: firefox_profile.rc != 0
+
+- name: Copy user.js to profile folder
+  ansible.builtin.copy:
+    src: /usr/share/arkenfox-user.js/user.js
+    dest: '{{ firefox_profile.stdout }}/user.js'
+    owner: user
+    group: user
+    mode: '0644'
+
+- name: Copy user-overrides.js to profile folder
+  ansible.builtin.copy:
+    src: assets/user-overrides.js
+    dest: '{{ firefox_profile.stdout }}/user-overrides.js'
+    owner: user
+    group: user
+    mode: '0644'
+
+- name: Update profile with arkenfox scripts
+  ansible.builtin.shell: sudo -u user arkenfox-updater -p {{ firefox_profile.stdout }}
+  args:
+    chdir: '{{ firefox_profile.stdout }}'
+
+- name: Copy firefox profiles.ini
+  ansible.builtin.template:
+    src: assets/firefox_profile_ini
+    dest: /home/user/.mozilla/firefox/profiles.ini
+    owner: user
+    group: user
+    mode: '0644'
+
+- name: Find default-release firefox profile folder
+  ansible.builtin.shell: ./find_firefox_profile.py default-release /home/user/.mozilla/firefox
+  register: firefox_default_release
+  args:
+    chdir: assets
+  failed_when: firefox_default_release.rc != 0
+
+- name: Delete default-release firefox profile folder
+  ansible.builtin.file:
+    path: '{{ firefox_default_release.stdout }}'
+    state: absent
+
+- name: Delete firefox telemetry libraries
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+  with_items:
+    - /usr/lib/firefox/crashreporter
+    - /usr/lib/firefox/minidump-analyzer
+    - /usr/lib/firefox/pingsender

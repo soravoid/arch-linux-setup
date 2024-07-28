@@ -3,7 +3,6 @@
     - name: Install packages from official repos
       community.general.pacman:
         name:
-          - firefox
           - neovim
           - thunderbird
           - mpv
@@ -13,22 +12,6 @@
           - torbrowser-launcher
           - ufw
         state: present
-    - name: Install paru from AUR
-      kewlfft.aur.aur:
-        name: paru
-        use: makepkg
-        state: present
-      become: true
-      become_user: aur_builder
-    - name: Install informant from AUR
-      kewlfft.aur.aur:
-        name: informant
-        state: present
-        use: paru
-      become: true
-      become_user: aur_builder
-    - name: Read informant messages
-      ansible.builtin.shell: informant read --all
     - name: Install packages from AUR
       kewlfft.aur.aur:
         name:
@@ -40,83 +23,18 @@
         state: present
       become: true
       become_user: aur_builder
-
-- name: Enable multilib repository
-  ansible.builtin.replace:
-    path: /etc/pacman.conf
-    regexp: '(?m)^#(\[multilib\])$\n#(Include = \/etc\/pacman\.d\/mirrorlist)$'
-    replace: '\1\n\2'
-  when: use_lib32|bool
-
-- name: Install 32-bit packages
-  community.general.pacman:
-    name:
-      - lib32-pipewire
-    state: present
-    update_cache: true
-  when: use_lib32|bool
-
-- name: Create .config directory
-  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/
+    - name: Install 32-bit packages
+      community.general.pacman:
+        name:
+          - lib32-pipewire
+        state: present
+        update_cache: true
+      when: use_lib32|bool
 
 - name: Set up AstroNvim config
   ansible.builtin.shell: sudo -u user git clone https://github.com/soravoid/astronvim-user-config.git /home/user/.config/nvim
   args:
     creates: /home/user/.config/nvim
-
-- name: Set up firefox
-  block:
-    - name: Create 'default' firefox profile
-      ansible.builtin.shell: sudo -u user firefox --headless -CreateProfile default
-    - name: Find firefox profile folder
-      ansible.builtin.shell: ./find_firefox_profile.py default /home/user/.mozilla/firefox
-      register: firefox_profile
-      args:
-        chdir: assets
-      failed_when: firefox_profile.rc != 0
-    - name: Copy user.js to profile folder
-      ansible.builtin.copy:
-        src: /usr/share/arkenfox-user.js/user.js
-        dest: '{{ firefox_profile.stdout }}/user.js'
-        owner: user
-        group: user
-        mode: '0644'
-    - name: Copy user-overrides.js to profile folder
-      ansible.builtin.copy:
-        src: assets/user-overrides.js
-        dest: '{{ firefox_profile.stdout }}/user-overrides.js'
-        owner: user
-        group: user
-        mode: '0644'
-    - name: Update profile with arkenfox scripts
-      ansible.builtin.shell: sudo -u user arkenfox-updater -p {{ firefox_profile.stdout }}
-      args:
-        chdir: '{{ firefox_profile.stdout }}'
-    - name: Copy firefox profiles.ini
-      ansible.builtin.template:
-        src: assets/firefox_profile_ini
-        dest: /home/user/.mozilla/firefox/profiles.ini
-        owner: user
-        group: user
-        mode: '0644'
-    - name: Find default-release firefox profile folder
-      ansible.builtin.shell: ./find_firefox_profile.py default-release /home/user/.mozilla/firefox
-      register: firefox_default_release
-      args:
-        chdir: assets
-      failed_when: firefox_default_release.rc != 0
-    - name: Delete default-release firefox profile folder
-      ansible.builtin.file:
-        path: '{{ firefox_default_release.stdout }}'
-        state: absent
-    - name: Delete firefox telemetry libraries
-      ansible.builtin.file:
-        path: '{{ item }}'
-        state: absent
-      with_items:
-        - /usr/lib/firefox/crashreporter
-        - /usr/lib/firefox/minidump-analyzer
-        - /usr/lib/firefox/pingsender
 
 - name: Set up UFW
   block:

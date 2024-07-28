@@ -5,6 +5,7 @@
     append: true
     create_home: true
     password: $6$rounds=65536$mrGrklOiPVPpPncB$/sips.RzxWEQSu1RgvOmxfLOHbONM5OFV7m.wiFTYraLusMgpsMMztuEQ9rKjgKYYFB9dd7H2AWvIjghDbgjw1
+
 - name: Create user 'admin'
   ansible.builtin.user:
     name: admin
@@ -12,7 +13,11 @@
     append: true
     create_home: true
     password: $6$rounds=65536$eI1aoveJfvIiJzVc$maIorMl1cmPDO7UjU7DtKGI2fT5td4stoV4p5tODNooCKWxIvQYyS1DQbFrEHQyq8ssJd1HRQiwgbcEKnRlvM/
+
 - name: Lock root account password
   ansible.builtin.user:
     name: root
     password_lock: true
+
+- name: Ensure user .config dir exists
+  ansible.builtin.shell: sudo -u user mkdir -p /home/user/.config/
