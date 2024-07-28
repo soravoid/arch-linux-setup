@@ -66,10 +66,10 @@
 
 - name: Set up firefox
   block:
-    - name: Create 'default-release' firefox profile
-      ansible.builtin.shell: sudo -u user firefox --headless -CreateProfile default-release
+    - name: Create 'default' firefox profile
+      ansible.builtin.shell: sudo -u user firefox --headless -CreateProfile default
     - name: Find firefox profile folder
-      ansible.builtin.shell: ./find_firefox_profile.py default-release /home/user/.mozilla/firefox
+      ansible.builtin.shell: ./find_firefox_profile.py default /home/user/.mozilla/firefox
       register: firefox_profile
       args:
         chdir: assets
@@ -92,6 +92,13 @@
       ansible.builtin.shell: sudo -u user arkenfox-updater -p {{ firefox_profile.stdout }}
       args:
         chdir: '{{ firefox_profile.stdout }}'
+    - name: Copy firefox profiles.ini
+      ansible.builtin.template:
+        src: assets/firefox_profile_ini
+        dest: /home/user/.mozilla/firefox/profiles.ini
+        owner: user
+        group: user
+        mode: '0644'
     - name: Delete firefox telemetry libraries
       ansible.builtin.file:
         path: '{{ item }}'
