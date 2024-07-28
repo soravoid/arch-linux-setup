@@ -71,6 +71,13 @@
       args:
         chdir: assets
       failed_when: firefox_profile.rc != 0
+    - name: Copy user.js to profile folder
+      ansible.builtin.copy:
+        src: /usr/share/arkenfox-user.js/user.js
+        dest: '{{ firefox_profile.stdout }}/user.js'
+        owner: user
+        group: user
+        mode: '0644'
     - name: Copy user-overrides.js to profile folder
       ansible.builtin.copy:
         src: assets/user-overrides.js
