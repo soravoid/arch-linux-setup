@@ -48,19 +48,6 @@
     group: user
     mode: '0644'
 
-- name: Find default-release firefox profile folder
-  ansible.builtin.command: ./find_firefox_profile.py default-release /home/user/.mozilla/firefox
-  register: firefox_default_release
-  args:
-    chdir: assets
-  failed_when: firefox_default_release.rc != 0
-  changed_when: false
-
-- name: Delete default-release firefox profile folder
-  ansible.builtin.file:
-    path: '{{ firefox_default_release.stdout }}'
-    state: absent
-
 - name: Delete firefox telemetry libraries
   ansible.builtin.file:
     path: '{{ item }}'
