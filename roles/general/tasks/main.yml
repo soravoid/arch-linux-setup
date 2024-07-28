@@ -86,3 +86,11 @@
       ansible.builtin.shell: sudo -u user sh -c 'echo 1 | arkenfox-cleaner'
       args:
         chdir: '{{ firefox_profile.stdout }}'
+    - name: Delete firefox telemetry libraries
+      ansible.builtin.file:
+        path: '{{ item }}'
+        state: absent
+      with_items:
+        - /usr/lib/firefox/crashreporter
+        - /usr/lib/firefox/minidump-analyzer
+        - /usr/lib/firefox/pingsender
