@@ -16,13 +16,15 @@
         name: paru
         use: makepkg
         state: present
-      become: yes
+      become: true
       become_user: aur_builder
     - name: Install informant from AUR
       kewlfft.aur.aur:
         name: informant
         state: present
         use: paru
+      become: true
+      become_user: aur_builder
     - name: Read informant messages
       ansible.builtin.shell: informant read --all
     - name: Install packages from AUR
@@ -33,7 +35,7 @@
           - arkenfox-user.js
         use: paru
         state: present
-      become: yes
+      become: true
       become_user: aur_builder
 
 - name: Enable multilib repository
