@@ -66,10 +66,10 @@
 
 - name: Set up firefox
   block:
-    - name: Create 'default' firefox profile
-      ansible.builtin.shell: sudo -u user firefox --headless -CreateProfile default
+    - name: Create 'default-release' firefox profile
+      ansible.builtin.shell: sudo -u user firefox --headless -CreateProfile default-release
     - name: Find firefox profile folder
-      ansible.builtin.shell: ./find_firefox_profile.py default /home/user/.mozilla/firefox
+      ansible.builtin.shell: ./find_firefox_profile.py default-release /home/user/.mozilla/firefox
       register: firefox_profile
       args:
         chdir: assets
