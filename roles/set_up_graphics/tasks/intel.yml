@@ -20,13 +20,14 @@
         name: intel-media-driver
         state: present
     - name: Set up environment variables
-      ansible.builtin.blockinfile:
+      ansible.builtin.lineinfile:
         path: /etc/environment
         create: true
         owner: root
         group: root
         mode: '0644'
-        block: |
-          LIBVA_DRIVER_NAME=iHD
-          VDPAU_DRIVER=va_gl
+        line: {{ item }} 
+        loop:
+         - LIBVA_DRIVER_NAME=iHD
+         - VDPAU_DRIVER=va_gl
 

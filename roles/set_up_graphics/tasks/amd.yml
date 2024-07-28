@@ -29,15 +29,16 @@
         state: present
       when: use_lib32 | bool
     - name: Set environment variables
-      ansible.builtin.blockinfile:
+      ansible.builtin.lineinfile:
         path: /etc/environment
+        line: {{ item }}
         create: true
         owner: root
         group: root
         mode: '0644'
-        block: |
-          LIBVA_DRIVER_NAME=radeonsi
-          VDPAU_DRIVER=radeonsi
+        loop:
+         - LIBVA_DRIVER_NAME=radeonsi
+         - VDPAU_DRIVER=radeonsi
 
 - name: Set up VRAM Eviction Helper
   block:

@@ -120,13 +120,13 @@
 - name: Prevent core dumps
   block:
     - name: Prevent systemd from core dumping
-      ansible.builtin.blockinfile:
-        path: /etc/systemd/coredump.conf.d/disable.conf
-        create: true
+      ansible.builtin.copy:
+        dest: /etc/systemd/coredump.conf.d/disable.conf
         owner: root
         group: root
+        directory_mode: '0755'
         mode: '0644'
-        block: |
+        content: |
           [Coredump]
           Storage=none
     - name: Prevent ulimit from core dumping

@@ -7,13 +7,12 @@
     state: present
 
 - name: Use iwd as backend for NetworkManager
-  ansible.builtin.blockinfile:
-    path: /etc/NetworkManager/conf.d/wifi_backend.conf
-    create: true
+  ansible.builtin.copy:
+    dest: /etc/NetworkManager/conf.d/wifi_backend.conf
     owner: root
     group: root
     mode: '0644'
-    block: |
+    content: |
       [device]
       wifi.backend=iwd
 
@@ -38,13 +37,12 @@
     enabled: true
 
 - name: Enable IPv6 privacy extensions
-  ansible.builtin.blockinfile:
-    path: /etc/NetworkManager/NetworkManager.conf
-    create: true
+  ansible.builtin.copy:
+    dest: /etc/NetworkManager/conf.d/ipv6_privacy.conf
     owner: root
     group: root
     mode: '0644'
-    block: |
+    content: |
       [connection]
       ipv6.ip6-privacy=2
 
