@@ -1,13 +1,15 @@
 - name: Clone selinux from archhardened repo  # noqa: latest
   ansible.builtin.git:
     repo: https://github.com/archlinuxhardened/selinux.git
-    dest: /root/selinux
+    dest: /home/aur_builder/selinux
+  become: true
+  become_user: aur_builder
 
 - name: Get SELinux GPG keys
   ansible.builtin.command: ./recv_gpg_keys.sh
   register: gpg_output
   args:
-    chdir: /root/selinux
+    chdir: /home/aur_builder/selinux
   changed_when: gpg_output.rc == 0
 
 - name: Enable SELinux arch repo
@@ -22,12 +24,14 @@
   ansible.builtin.command: ./build_and_install_all.sh
   register: selinux_out
   args:
-    chdir: /root/selinux
+    chdir: /home/aur_builder/selinux
   changed_when: selinux_out.rc == 0
+  become: true
+  become_user: aur_builder
 
 - name: Delete selinux build files
   ansible.builtin.file:
-    path: /root/selinux
+    path: /home/aur_builder/selinux
     state: absent
 
 - name: Change lsm kernel parameter
