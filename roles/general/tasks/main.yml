@@ -18,20 +18,23 @@
         state: present
       become: yes
       become_user: aur_builder
+    - name: Install informant from AUR
+      kewlfft.aur.aur:
+        name: informant
+        state: present
+        use: paru
+    - name: Read informant messages
+      ansible.builtin.shell: informant read --all
     - name: Install packages from AUR
       kewlfft.aur.aur:
         name:
           - webcord
           - anki-bin
-          - informant
           - arkenfox-user.js
         use: paru
         state: present
       become: yes
       become_user: aur_builder
-
-- name: Read informant messages
-  ansible.builtin.shell: informant read --all
 
 - name: Enable multilib repository
   ansible.builtin.replace:
