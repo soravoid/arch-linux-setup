@@ -10,6 +10,8 @@
           - pipewire
           - wireplumber
           - pipewire-audio
+          - torbrowser-launcher
+          - ufw
         state: present
     - name: Install paru from AUR
       kewlfft.aur.aur:
@@ -33,6 +35,7 @@
           - webcord
           - anki-bin
           - arkenfox-user.js
+          - mullvad-browser-bin
         use: paru
         state: present
       become: true
@@ -97,3 +100,15 @@
         - /usr/lib/firefox/crashreporter
         - /usr/lib/firefox/minidump-analyzer
         - /usr/lib/firefox/pingsender
+
+- name: Set up UFW
+  block:
+    - name: Set UFW to default deny all incoming traffic
+      ansible.builtin.shell: ufw default deny
+    - name: Enable UFW firewall
+      ansible.builtin.shell: ufw --force enable
+      ansible.builtin.shell: ufw default deny
+    - name: Enable UFW systemd service
+      ansible.builtin.systemd_service:
+        name: ufw
+        enabled: true
