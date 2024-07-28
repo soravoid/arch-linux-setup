@@ -24,6 +24,7 @@
           - webcord
           - anki-bin
           - informant
+          - arkenfox-user.js
         use: paru
         state: present
       become: yes
@@ -54,3 +55,29 @@
   ansible.builtin.shell: sudo -u user git clone https://github.com/soravoid/astronvim-user-config.git /home/user/.config/nvim
   args:
     creates: /home/user/.config/nvim
+
+- name: Set up firefox
+  block:
+    - name: Create 'default' firefox profile
+      ansible.builtin.shell: sudo -u user firefox -CreateProfile default
+    - name: Find firefox profile folder
+      ansible.builtin.shell: ./find_firefox_profile.py default /home/user/.mozilla/firefox
+      register: firefox_profile
+      args:
+        chdir: assets
+      failed_when: firefox_profile.rc != 0
+    - name: Copy user-overrides.js to profile folder
+      ansible.builtin.copy:
+        src: assets/user-overrides.js
+        dest: '{{ firefox_profile.stdout }}/user-overrides.js'
+        owner: user
+        group: user
+        mode: '0644'
+    - name: Update profile with arkenfox scripts
+      ansible.builtin.shell: sudo -u user arkenfox-updater -p {{ firefox_profile.stdout }}
+      args:
+        chdir: '{{ firefox_profile.stdout }}'
+    - name: Run arkenfox prefs cleaner
+      ansible.builtin.shell: sudo -u user sh -c 'echo 1 | arkenfox-cleaner'
+      args:
+        chdir: '{{ firefox_profile.stdout }}'
