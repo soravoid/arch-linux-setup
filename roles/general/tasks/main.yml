@@ -89,10 +89,6 @@
       ansible.builtin.shell: sudo -u user arkenfox-updater -p {{ firefox_profile.stdout }}
       args:
         chdir: '{{ firefox_profile.stdout }}'
-    - name: Run arkenfox prefs cleaner
-      ansible.builtin.shell: sudo -u user sh -c 'echo 1 | arkenfox-cleaner'
-      args:
-        chdir: '{{ firefox_profile.stdout }}'
     - name: Delete firefox telemetry libraries
       ansible.builtin.file:
         path: '{{ item }}'
