@@ -54,7 +54,7 @@
 - name: Enable early loading for NVIDIA
   ansible.builtin.lineinfile:
     path: /etc/mkinitcpio.conf
-    regexp: '(?m)^MODULES=\((.*)\)'
+    regexp: '(?m)^MODULES=\(((?:(?!nvidia).)*)\)'
     line: 'MODULES=(\1 nvidia nvidia_modeset nvidia_uvm nvidia_drm)'
 
 - name: Ensure pacman hooks folder exists

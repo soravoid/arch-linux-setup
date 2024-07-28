@@ -54,12 +54,11 @@
       args:
         chdir: assets
     - name: Add cursor block to hyprland.conf
-      ansible.builtin.lineinfile:
+      ansible.builtin.blockinfile:
         path: /home/user/.config/hypr/hyprland.conf
-        line: {{ item }}
         create: no
-      loop:
-        - "cursor {"
-        - "    no_hardware_cursors = true"
-        - "}"
+        block: |
+          cursor {
+              no_hardware_cursors = true
+          }
 
