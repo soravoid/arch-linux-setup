@@ -8,18 +8,18 @@
     - name: Change CFLAGS
       ansible.builtin.lineinfile:
         path: /etc/makepkg.conf
-        regexp: '^CFLAGS="-march=.*? (.*)$'
+        regexp: '(?m)^CFLAGS="(?!-march=native)-march=.+?(?:\s+-mtune=.+?)?\s+(.*)$'
         backrefs: true
         line: 'CFLAGS="-march=native \1'
     - name: Change LDFLAGS
       ansible.builtin.lineinfile:
         path: /etc/makepkg.conf
-        regexp: '^LDFLAGS="(-Wl,.*)$'
+        regexp: '(?m)^LDFLAGS="((?!-fuse-ld=mold ).*)$'
         backrefs: true
         line: 'LDFLAGS="-fuse-ld=mold \1'
     - name: Change RUSTFLAGS
       ansible.builtin.lineinfile:
         path: /etc/makepkg.conf
-        regexp: '^RUSTFLAGS="(-C.*)$'
+        regexp: '(?m)^RUSTFLAGS="((?!-C target-cpu=native -C link-arg=-fuse-ld-mold )-C.*)$'
         backrefs: true
         line: 'RUSTFLAGS="-C target-cpu=native -C link-arg=-fuse-ld=mold \1'
