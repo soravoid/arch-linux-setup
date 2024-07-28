@@ -50,13 +50,13 @@
     - name: Editing /etc/pam.d/su
       ansible.builtin.lineinfile:
         path: /etc/pam.d/su
-        regexp: '^#(auth\s+required\s+pam_wheel.so\s+use_uid)'
+        regexp: '(?m)^#(auth\s+required\s+pam_wheel.so\s+use_uid)'
         backrefs: true
         line: '\1'
     - name: Editing /etc/pam.d/su-l
       ansible.builtin.lineinfile:
         path: /etc/pam.d/su-l
-        regexp: '^#(auth\s+required\s+pam_wheel.so\s+use_uid)'
+        regexp: '(?m)^#(auth\s+required\s+pam_wheel.so\s+use_uid)'
         backrefs: true
         line: '\1'
 
@@ -72,7 +72,7 @@
 - name: Increase number of hashing rounds
   ansible.builtin.lineinfile:
     path: /etc/pam.d/passwd
-    regexp: '^password'
+    regexp: '(?m)^password'
     line: 'password required pam_unix.so sha512 shadow nullok rounds=65536'
 
 - name: Allow user 'admin' to use sudo

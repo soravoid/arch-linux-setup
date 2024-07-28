@@ -14,7 +14,7 @@
 - name: Remove kms from mkinitcpio.conf
   ansible.builtin.lineinfile:
     path: /etc/mkinitcpio.conf
-    regexp: '^HOOKS=\((.*?) kms (.*?)\)'
+    regexp: '(?m)^HOOKS=\((.*?) kms (.*?)\)'
     backrefs: true
     line: 'HOOKS=(\1 \2)'
     create: false
@@ -54,7 +54,7 @@
 - name: Enable early loading for NVIDIA
   ansible.builtin.lineinfile:
     path: /etc/mkinitcpio.conf
-    regexp: '^MODULES=\((.*)\)'
+    regexp: '(?m)^MODULES=\((.*)\)'
     line: 'MODULES=(\1 nvidia nvidia_modeset nvidia_uvm nvidia_drm)'
 
 - name: Ensure pacman hooks folder exists
