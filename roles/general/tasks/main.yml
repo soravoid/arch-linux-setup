@@ -58,3 +58,11 @@
   become_user: user
   register: rustup_out
   changed_when: '"installed" in rustup_out.stdout_lines[-1]'
+
+- name: Allow admin account to use sudo
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/admin.conf
+    content: 'admin ALL=(ALL) ALL'
+    owner: root
+    group: root
+    mode: '0644'
