@@ -11,8 +11,8 @@
     name: informant
     state: present
     use: paru
-      become: true
-      become_user: aur_builder
+  become: true
+  become_user: aur_builder
 
 - name: Read informant messages
   ansible.builtin.shell: informant read --all
