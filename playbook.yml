@@ -10,7 +10,7 @@
   roles:
     - set_up_users
     - create_aur_builder
-    - performance
+    - write_build_flags
     - configure_pacman
     - general
     - set_up_terminal
