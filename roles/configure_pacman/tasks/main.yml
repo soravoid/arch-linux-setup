@@ -3,6 +3,13 @@
     name: rustup
     state: present
 
+- name: Set default rust version for aur_builder
+  ansible.builtin.command: rustup default stable
+  become: true
+  become_user: aur_builder
+  register: rustup_out
+  changed_when: '"installed" in rustup_out.stdout_lines[-1]'
+
 - name: Install paru from AUR
   kewlfft.aur.aur:
     name: paru
