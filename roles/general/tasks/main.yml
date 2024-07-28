@@ -12,6 +12,7 @@
           - torbrowser-launcher
           - ufw
         state: present
+        update_cache: true
     - name: Install packages from AUR
       kewlfft.aur.aur:
         name:
