@@ -51,3 +51,10 @@
       ansible.builtin.systemd_service:
         name: ufw
         enabled: true
+
+- name: Set default rust version for user
+  ansible.builtin.command: rustup default stable
+  become: true
+  become_user: user
+  register: rustup_out
+  changed_when: '"installed" in rustup_out.stdout_lines[-1]'

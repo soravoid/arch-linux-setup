@@ -1,3 +1,8 @@
+- name: Install rustup
+  community.general.pacman:
+    name: rustup
+    state: present
+
 - name: Install paru from AUR
   kewlfft.aur.aur:
     name: paru
