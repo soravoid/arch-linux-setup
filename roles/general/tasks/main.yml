@@ -124,7 +124,6 @@
       ansible.builtin.shell: ufw default deny
     - name: Enable UFW firewall
       ansible.builtin.shell: ufw --force enable
-      ansible.builtin.shell: ufw default deny
     - name: Enable UFW systemd service
       ansible.builtin.systemd_service:
         name: ufw
