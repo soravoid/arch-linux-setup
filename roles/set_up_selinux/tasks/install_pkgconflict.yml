@@ -18,13 +18,11 @@
   ansible.builtin.find:
     path: '/home/aur_builder/{{ item }}'
     patterns:
-      - '*.pkg.tar.xz'
-      - '*.pkg.tar.zstd'
-      - '*.pkg.tar.xz.sig'
-      - '*.pkg.tar.zstd.sig'
+      - '{{ "*" + makepkg_ext.stdout }}'
+      - '{{ "*" + makepkg_ext.stdout + ".sig" }}'
   register: git_files
 
-- name: 'Delete .pkg.tar.{xz,zstd}{,.sig}'
+- name: Delete package files
   ansible.builtin.file:
     path: '{{ file_item }}'
     state: absent
@@ -42,10 +40,20 @@
   become_user: aur_builder
 
 - name: Install {{ item }}
-  ansible.builtin.command: >
-      pacman -U --ask=4 {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + '*' + makepkg_ext.stdout) | first | trim }}
-  register: pacman_out
-  changed_when: pacman_out.rc == 0
+  block:
+    - name: Try to install package file with package name
+      ansible.builtin.command: >
+        pacman -U --ask=4 \
+        {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + item + '*' + makepkg_ext.stdout) | first | trim }}
+      register: pacman_out
+      changed_when: pacman_out.rc == 0
+  rescue:
+    - name: Try to install any package file in the repo directory
+      ansible.builtin.command: >
+        pacman -U --ask=4 \
+        {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/*' + makepkg_ext.stdout) | first | trim }}
+      register: pacman_out
+      changed_when: pacman_out.rc == 0
 
 - name: Clean up build files for {{ item }}
   ansible.builtin.file:
