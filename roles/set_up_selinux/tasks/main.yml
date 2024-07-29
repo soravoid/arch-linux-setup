@@ -3,6 +3,22 @@
     name: python-pexpect
     state: present
 
+- name: Download GPG import script
+  ansible.builtin.get_url:
+    url: 'https://raw.githubusercontent.com/archlinuxhardened/selinux/master/recv_gpg_keys.sh'
+    dest: /home/aur_builder/recv_gpg_keys.sh
+    owner: aur_builder
+    group: aur_builder
+    mode: '0755'
+
+- name: Import GPG keys via script
+  ansible.builtin.shell: >
+    bash /home/aur_builder/recv_gpg_keys.sh && rm /home/aur_builder/recv_gpg_keys.sh
+  args:
+    removes: /home/aur_builder/recv_gpg_keys.sh
+  become: true
+  become_user: aur_builder
+
 - name: Download SELinux packages
   block:
     - name: Get makepkg compression extension

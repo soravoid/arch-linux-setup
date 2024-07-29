@@ -33,12 +33,8 @@
   become_user: aur_builder
 
 - name: Installing {{ item }}
-  ansible.builtin.expect:
-    command: >
-      bash -c "pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + '*' + makepkg_ext.stdout) | first | trim }}"
-    responses:
-      "(?m)^.*are in conflict.*$": y
-      "(?m)^.*installation?.*$": y
+  ansible.builtin.command: >
+      pacman -U --ask=4 {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + '*' + makepkg_ext.stdout) | first | trim }}
   register: pacman_out
   changed_when: pacman_out.rc == 0
 
