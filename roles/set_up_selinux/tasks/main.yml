@@ -96,7 +96,8 @@
             use_regex: false
           register: selinux_exec
         - name: Install sudo-selinux
-          ansible.builtin.command: pacman -U {{ lookup('ansible.builtin.fileglob', '/home/aur_builder/sudo-selinux*' + makepkg_ext.stdout) | first }}
+          ansible.builtin.command: >
+            pacman -U --ask=4 {{ lookup('ansible.builtin.fileglob', '/home/aur_builder/sudo-selinux/sudo-selinux*' + makepkg_ext.stdout) | first | trim }}
           register: pacman_out
           changed_when: pacman_out.rc == 0
         - name: Change default sudoers file with previous sudoers
