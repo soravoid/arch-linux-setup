@@ -12,7 +12,8 @@
     - name: Download SELinux packages (1/5)
       kewlfft.aur.aur:
         name:
-          - libsepol - libselinux
+          - libsepol
+          - libselinux
           - checkpolicy
           - secilc
           - setools
