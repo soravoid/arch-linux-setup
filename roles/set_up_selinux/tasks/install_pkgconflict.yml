@@ -11,6 +11,7 @@
   become: true
   become_user: aur_builder
   register: gpg_out
+  retries: 5
   changed_when: gpg_out.rc == 0
 
 - name: Find package files in repo for {{ item }}
