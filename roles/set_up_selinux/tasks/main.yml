@@ -1,6 +1,10 @@
 - name: Download SELinux packages
   block:
-    - name: Download SELinux packages (1/7)
+    - name: Get makepkg compression extension
+      ansible.builtin.command: bash -c 'source /etc/makepkg.conf; echo "$PKGEXT"'
+      register: makepkg_ext
+      changed_when: false
+    - name: Download SELinux packages (1/5)
       kewlfft.aur.aur:
         name:
           - libsepol
@@ -19,33 +23,23 @@
         use: paru
       become: true
       become_user: aur_builder
-    - name: Download SELinux packages (2/7)
-      kewlfft.aur.aur:
-        name:
-          - pambase-selinux
-          - pam-selinux
-        aur_only: true
-        state: present
-        use: paru
-      become: true
-      become_user: aur_builder
-    - name: Download SELinux packages (3/7)
-      kewlfft.aur.aur:
-        name:
-          - coreutils-selinux
-          - findutils-selinux
-          - iproute2-selinux
-          - logrotate-selinux
-          - openssh-selinux
-          - psmisc-selinux
-          - shadow-selinux
-          - cronie-selinux
-        aur_only: true
-        state: present
-        use: paru
-      become: true
-      become_user: aur_builder
-    - name: Download SELinux packages (4/7)
+    - name: Download SELinux packages (2/5)
+      ansible.builtin.include_tasks: install_pkgconflict.yml
+      loop:
+        - pambase-selinux
+        - pam-selinux
+    - name: Download SELinux packages (3/5)
+      ansible.builtin.include_tasks: install_pkgconflict.yml
+      loop:
+        - coreutils-selinux
+        - findutils-selinux
+        - iproute2-selinux
+        - logrotate-selinux
+        - openssh-selinux
+        - psmisc-selinux
+        - shadow-selinux
+        - cronie-selinux
+    - name: Download SELinux packages (4/5)
       block:
         - name: Check if sudoers file exists
           ansible.builtin.stat:
@@ -66,17 +60,11 @@
             dest: /home/aur_builder/sudo-selinux
           become: true
           become_user: aur_builder
-        - name: Get makepkg compression extension
-          ansible.builtin.shell: >
-            set -o pipefail
-            cat /etc/makepkg.conf |  grep PKGEXT | grep -oP "PKGEXT='\K(.+)(?=')"
-          register: makepkg_ext
-          changed_when: false
         - name: Build sudo-selinux
           ansible.builtin.command: makepkg -s -C --noconfirm
           args:
             chdir: /home/aur_builder/sudo-selinux
-            creates: /home/aur_builder/sudo-selinux/sudo-selinux-* + makepkg_ext.stdout
+            creates: '{{ "/home/aur_builder/sudo-selinux/sudo-selinux*" + makepkg_ext.stdout }}'
           become: true
           become_user: aur_builder
         - name: Find sudo-selinux package
@@ -87,7 +75,7 @@
             use_regex: false
           register: selinux_exec
         - name: Install sudo-selinux
-          ansible.builtin.command: pacman -U {{ selinux_exec.files | first }}
+          ansible.builtin.command: pacman -U {{ lookup('ansible.builtin.fileglob', '/home/aur_builder/sudo-selinux*' + makepkg_ext.stdout) | first }}
           register: pacman_out
           changed_when: pacman_out.rc == 0
         - name: Change default sudoers file with previous sudoers
@@ -100,36 +88,15 @@
           ansible.builtin.file:
             path: /home/aur_builder/sudo-selinux
             state: absent
-    - name: Download SELinux packages (5/7)
-      # Use loop to make sure everything happens sequentially
-      kewlfft.aur.aur:
-        name: '{{ item }}'
-        state: present
-        use: paru
-        aur_only: true
-      become: true
-      become_user: aur_builder
+    - name: Download SELinux packages (5/5)
+      ansible.builtin.include_tasks: install_pkgconflict.yml
       loop:
         - util-linux-selinux
         - systemd-selinux
         - util-linux-selinux
         - systemd-selinux
-    - name: Download SELinux packages (6/7)
-      kewlfft.aur.aur:
-        name: dbus-selinux
-        state: present
-        use: paru
-        aur_only: true
-      become: true
-      become_user: aur_builder
-    - name: Download SELinux packages (7/7)
-      kewlfft.aur.aur:
-        name: selinux-alpm-hook
-        state: present
-        use: paru
-        aur_only: true
-      become: true
-      become_user: aur_builder
+        - dbus-linux
+        - selinux-alpm-hook
 
 - name: Change lsm kernel parameter
   ansible.builtin.lineinfile:

@@ -1,0 +1,35 @@
+- name: Clone git repo for {{ item }}  # noqa: latest
+  ansible.builtin.git:
+    repo: 'https://aur.archlinux.org/{{ item }}.git'
+    dest: '/home/aur_builder/{{ item }}'
+  become: true
+  become_user: aur_builder
+- name: Find package files in repo for {{ item }}
+  ansible.builtin.fileglob:
+    path: '/home/aur_builder/{{ item }}'
+    patterns:
+      - '*.pkg.tar.xz'
+      - '*.pkg.tar.zstd'
+      - '*.pkg.tar.xz.sig'
+      - '*.pkg.tar.zstd.sig'
+    register: git_files
+- name: 'Delete .pkg.tar.{xz,zstd}{,.sig}'
+  ansible.builtin.file:
+    path: '{{ file_item }}'
+    state: absent
+  loop: '{{ git_files.files }}'
+  loop_control:
+    loop_var: file_item
+- name: Building {{ item }}
+  ansible.builtin.shell: >
+    makepkg -s -C --noconfirm{% if item == 'systemd-selinux' %} --no-check{% endif %}
+  args:
+    chdir: '/home/aur_builder/{{ item }}'
+    creates: '/home/aur_builder/{{ item }}/{{ item + "*" + makepkg_ext.stdout }}'
+  become: true
+  become_user: aur_builder
+- name: Installing {{ item }}
+  ansible.builtin.shell: >
+    pacman -U /home/aur_builder/{{ item }}/{{ lookup('ansible.builtin.fileglob', item + "*" + makepkg_ext.stdout) | first }}
+  register: pacman_out
+  changed_when: pacman_out.rc == 0
