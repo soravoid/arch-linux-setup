@@ -28,14 +28,17 @@
     makepkg -s -C --noconfirm{% if item == 'systemd-selinux' %} --no-check{% endif %}
   args:
     chdir: '/home/aur_builder/{{ item }}'
-    creates: '/home/aur_builder/{{ item }}/{{ item + "*" + makepkg_ext.stdout }}'
+    creates: '/home/aur_builder/{{ item + "/*" + makepkg_ext.stdout }}'
   become: true
   become_user: aur_builder
 
 - name: Installing {{ item }}
-  ansible.builtin.shell: >
-    set -o pipefail
-    echo y | pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + item + '*' + makepkg_ext.stdout) | first }}
+  ansible.builtin.expect:
+    command: >
+      bash -c "pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + '*' + makepkg_ext.stdout) | first | trim }}"
+    responses:
+      "(?m)^.*are in conflict.*$": y
+      "(?m)^.*installation?.*$": y
   register: pacman_out
   changed_when: pacman_out.rc == 0
 
