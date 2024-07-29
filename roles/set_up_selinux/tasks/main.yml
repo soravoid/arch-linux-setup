@@ -1,3 +1,8 @@
+- name: Download python-pexpect
+  community.general.pacman:
+    name: python-pexpect
+    state: present
+
 - name: Download SELinux packages
   block:
     - name: Get makepkg compression extension
@@ -7,8 +12,7 @@
     - name: Download SELinux packages (1/5)
       kewlfft.aur.aur:
         name:
-          - libsepol
-          - libselinux
+          - libsepol - libselinux
           - checkpolicy
           - secilc
           - setools
@@ -97,6 +101,11 @@
         - systemd-selinux
         - dbus-linux
         - selinux-alpm-hook
+
+- name: Remove python-pexpect
+  community.general.pacman:
+    name: python-pexpect
+    state: absent
 
 - name: Change lsm kernel parameter
   ansible.builtin.lineinfile:

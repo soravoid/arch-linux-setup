@@ -31,8 +31,8 @@
 - name: Installing {{ item }}
   ansible.builtin.expect:
     command: >
-      pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + item + '*' + makepkg_ext.stdout) | first }}
+      bash -c "pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + item + '*' + makepkg_ext.stdout) | first }}"
     responses:
-      '{{ "(?m)^:: " + item + ".*? and (.*)-.? are in conflict.*$" }}': y
+      '{{ "(?m)^:: " + item + ".* are in conflict.*$" }}': y
   register: pacman_out
   changed_when: pacman_out.rc == 0
