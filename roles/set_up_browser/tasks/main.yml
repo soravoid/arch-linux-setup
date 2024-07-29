@@ -10,17 +10,15 @@
     creates: /home/user/.mozilla/firefox/*.default
 
 - name: Find firefox profile folder
-  ansible.builtin.command: ./find_firefox_profile.py default /home/user/.mozilla/firefox
-  register: firefox_profile
+  ansible.builtin.set_fact:
+    firefox_profile: "{{ lookup('ansible.builtin.fileglob', '/home/user/.mozilla/firefox/*.default') | first | trim }}"
   args:
     chdir: assets
-  changed_when: false
-  failed_when: firefox_profile.rc != 0
 
 - name: Copy user.js to profile folder
   ansible.builtin.copy:
     src: /usr/share/arkenfox-user.js/user.js
-    dest: '{{ firefox_profile.stdout }}/user.js'
+    dest: '{{ firefox_profile }}/user.js'
     owner: user
     group: user
     mode: '0644'
@@ -28,15 +26,15 @@
 - name: Copy user-overrides.js to profile folder
   ansible.builtin.copy:
     src: assets/user-overrides.js
-    dest: '{{ firefox_profile.stdout }}/user-overrides.js'
+    dest: '{{ firefox_profile }}/user-overrides.js'
     owner: user
     group: user
     mode: '0644'
 
 - name: Update profile with arkenfox scripts
-  ansible.builtin.command: sudo -u user arkenfox-updater -sp {{ firefox_profile.stdout }}
+  ansible.builtin.command: sudo -u user arkenfox-updater -sp {{ firefox_profile }}
   args:
-    chdir: '{{ firefox_profile.stdout }}'
+    chdir: '{{ firefox_profile }}'
   register: arkenfox_out
   changed_when: arkenfox_out.rc == 0
 
