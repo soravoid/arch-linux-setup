@@ -1,5 +1,6 @@
 #!/bin/bash
 
+GPG_KEYSRV="${GPG_KEYSRV:-hkp://keys.gnupg.net}"
 DIR="$1"
 
 validpgpkeys=()
