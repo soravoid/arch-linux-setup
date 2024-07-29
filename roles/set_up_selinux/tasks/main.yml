@@ -14,6 +14,7 @@
           - selinux-python
           - mcstrans
           - restorecond
+        aur_only: true
         state: present
         use: paru
       become: true
@@ -23,6 +24,7 @@
         name:
           - pambase-selinux
           - pam-selinux
+        aur_only: true
         state: present
         use: paru
       become: true
@@ -38,6 +40,7 @@
           - psmisc-selinux
           - shadow-selinux
           - cronie-selinux
+        aur_only: true
         state: present
         use: paru
       become: true
@@ -103,6 +106,7 @@
         name: '{{ item }}'
         state: present
         use: paru
+        aur_only: true
       become: true
       become_user: aur_builder
       loop:
@@ -115,6 +119,7 @@
         name: dbus-selinux
         state: present
         use: paru
+        aur_only: true
       become: true
       become_user: aur_builder
     - name: Download SELinux packages (7/7)
@@ -122,6 +127,7 @@
         name: selinux-alpm-hook
         state: present
         use: paru
+        aur_only: true
       become: true
       become_user: aur_builder
 
