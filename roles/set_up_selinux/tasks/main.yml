@@ -1,44 +1,129 @@
-- name: Clone selinux from archhardened repo  # noqa: latest
-  ansible.builtin.git:
-    repo: https://github.com/archlinuxhardened/selinux.git
-    dest: /home/aur_builder/selinux
-  become: true
-  become_user: aur_builder
-
-- name: Enable SELinux arch repo
-  ansible.builtin.blockinfile:
-    path: /etc/pacman.conf
-    block: |
-      [selinux]
-      Server = https://github.com/archlinuxhardened/selinux/releases/download/ArchLinux-SELinux
-      SigLevel = Never
-
-- name: Update pacman cache
-  community.general.pacman:
-    update_cache: true
-
-- name: Get SELinux GPG keys
-  ansible.builtin.command: ./recv_gpg_keys.sh
-  register: gpg_output
-  args:
-    chdir: /home/aur_builder/selinux
-  changed_when: gpg_output.rc == 0
-  become: true
-  become_user: aur_builder
-
-- name: Build and install SELinux
-  ansible.builtin.command: ./build_and_install_all.sh
-  register: selinux_out
-  args:
-    chdir: /home/aur_builder/selinux
-  changed_when: selinux_out.rc == 0
-  become: true
-  become_user: aur_builder
-
-- name: Delete selinux build files
-  ansible.builtin.file:
-    path: /home/aur_builder/selinux
-    state: absent
+- name: Download SELinux packages
+  block:
+    - name: Download SELinux packages (1/7)
+      kewlfft.aur.aur:
+        name:
+          - libsepol
+          - libselinux
+          - checkpolicy
+          - secilc
+          - setools
+          - libsemanage
+          - semodule-utils
+          - policycoreutils
+          - selinux-python
+          - mcstrans
+          - restorecond
+        state: present
+        use: paru
+      become: true
+      become_user: aur_builder
+    - name: Download SELinux packages (2/7)
+      kewlfft.aur.aur:
+        name:
+          - pambase-selinux
+          - pam-selinux
+        state: present
+        use: paru
+      become: true
+      become_user: aur_builder
+    - name: Download SELinux packages (3/7)
+      kewlfft.aur.aur:
+        name:
+          - coreutils-selinux
+          - findutils-selinux
+          - iproute2-selinux
+          - logrotate-selinux
+          - openssh-selinux
+          - psmisc-selinux
+          - shadow-selinux
+          - cronie-selinux
+        state: present
+        use: paru
+      become: true
+      become_user: aur_builder
+    - name: Download SELinux packages (4/7)
+      block:
+        - name: Check if sudoers file exists
+          ansible.builtin.stat:
+            path: /etc/sudoers
+            get_attributes: false
+            get_checksum: false
+            get_mime: false
+          register: sudoers
+        - name: Backup sudoers file
+          ansible.builtin.copy:
+            src: /etc/sudoers
+            dest: /etc/sudoers.pacsave
+            mode: preserve
+          when: sudoers.stat.exists
+        - name: Clone sudo-selinux repo  # noqa: latest
+          ansible.builtin.git:
+            repo: https://aur.archlinux.org/sudo-selinux.git
+            dest: /home/aur_builder/sudo-selinux
+          become: true
+          become_user: aur_builder
+        - name: Get makepkg compression extension
+          ansible.builtin.shell: >
+            set -o pipefail
+            cat /etc/makepkg.conf |  grep PKGEXT | grep -oP "PKGEXT='\K(.+)(?=')"
+          register: makepkg_ext
+          changed_when: false
+        - name: Build sudo-selinux
+          ansible.builtin.command: makepkg -s -C --noconfirm
+          args:
+            chdir: /home/aur_builder/sudo-selinux
+            creates: /home/aur_builder/sudo-selinux/sudo-selinux-* + makepkg_ext.stdout
+          become: true
+          become_user: aur_builder
+        - name: Find sudo-selinux package
+          ansible.builtin.find:
+            patterns: '{{ "sudo-selinux-*" + makepkg_ext.stdout }}'
+            file_type: file
+            paths: ["/home/aur_builder/sudo-selinux"]
+            use_regex: false
+          register: selinux_exec
+        - name: Install sudo-selinux
+          ansible.builtin.command: pacman -U {{ selinux_exec.files | first }}
+          register: pacman_out
+          changed_when: pacman_out.rc == 0
+        - name: Change default sudoers file with previous sudoers
+          when: sudoers.stat.exists
+          ansible.builtin.command: mv /etc/sudoers.pacsave /etc/sudoers
+          args:
+            creates: /etc/sudoers
+            removes: /etc/sudoers.pacsave
+        - name: Delete sudo-selinux folder
+          ansible.builtin.file:
+            path: /home/aur_builder/sudo-selinux
+            state: absent
+    - name: Download SELinux packages (5/7)
+      # Use loop to make sure everything happens sequentially
+      kewlfft.aur.aur:
+        name: '{{ item }}'
+        state: present
+        use: paru
+      become: true
+      become_user: aur_builder
+      loop:
+        - util-linux-selinux
+        - systemd-selinux
+        - util-linux-selinux
+        - systemd-selinux
+    - name: Download SELinux packages (6/7)
+      kewlfft.aur.aur:
+        name: dbus-selinux
+        state: present
+        use: paru
+      become: true
+      become_user: aur_builder
+    - name: Download SELinux packages (7/7)
+      kewlfft.aur.aur:
+        name: selinux-alpm-hook
+        state: present
+        use: paru
+      become: true
+      become_user: aur_builder
 
 - name: Change lsm kernel parameter
   ansible.builtin.lineinfile:
@@ -62,6 +147,7 @@
   kewlfft.aur.aur:
     name: selinux-refpolicy-src
     state: present
+    use: paru
   become: true
   become_user: aur_builder
 
@@ -69,7 +155,7 @@
   ansible.builtin.lineinfile:
     path: /etc/selinux/config
     regexp: '(?m)^SELINUXTYPE='
-    line: 'SELINUXTYPE=refpolicy-git'
+    line: 'SELINUXTYPE=refpolicy'
 
 - name: Make SELinux policy patch
   ansible.builtin.command: '{{ item.cmd }}'
