@@ -38,6 +38,7 @@
     chdir: '/home/aur_builder/{{ item }}'
     creates: '/home/aur_builder/{{ item + "/*" + makepkg_ext.stdout }}'
   become: true
+  retries: 3
   become_user: aur_builder
 
 - name: Install {{ item }}
