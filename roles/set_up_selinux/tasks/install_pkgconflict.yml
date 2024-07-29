@@ -5,7 +5,7 @@
   become: true
   become_user: aur_builder
 - name: Find package files in repo for {{ item }}
-  ansible.builtin.fileglob:
+  ansible.builtin.find:
     path: '/home/aur_builder/{{ item }}'
     patterns:
       - '*.pkg.tar.xz'
