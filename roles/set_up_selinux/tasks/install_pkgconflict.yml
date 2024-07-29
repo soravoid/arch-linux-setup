@@ -32,7 +32,7 @@
   loop_control:
     loop_var: file_item
 
-- name: Building {{ item }}
+- name: Build {{ item }}
   ansible.builtin.shell: >
     makepkg -s -C --noconfirm{% if item == 'systemd-selinux' %} --no-check{% endif %}
   args:
@@ -41,13 +41,13 @@
   become: true
   become_user: aur_builder
 
-- name: Installing {{ item }}
+- name: Install {{ item }}
   ansible.builtin.command: >
       pacman -U --ask=4 {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + '*' + makepkg_ext.stdout) | first | trim }}
   register: pacman_out
   changed_when: pacman_out.rc == 0
 
-- name: Cleaning up build files for {{ item }}
+- name: Clean up build files for {{ item }}
   ansible.builtin.file:
     path: /home/aur_builder/{{ item }}
     state: absent

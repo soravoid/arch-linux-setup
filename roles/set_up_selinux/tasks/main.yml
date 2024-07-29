@@ -75,7 +75,7 @@
             dest: /etc/sudoers.pacsave
             mode: preserve
           when: sudoers.stat.exists
-        - name: Install sudo-selinux
+        - name: Build and install sudo-selinux
           when: 'not "sudo-selinux" in pkgs.stdout'
           ansible.builtin.include_tasks: install_pkgconflict.yml
           vars:
