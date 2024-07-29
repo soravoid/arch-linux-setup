@@ -2,6 +2,7 @@
   ansible.builtin.git:
     repo: 'https://aur.archlinux.org/{{ item }}.git'
     dest: '/home/aur_builder/{{ item }}'
+  retries: 5
   become: true
   become_user: aur_builder
 
