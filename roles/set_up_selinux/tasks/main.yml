@@ -101,12 +101,10 @@
           become_user: aur_builder
           loop:
             - systemd-selinux
-            - systemd-libs-selinux
             - util-linux-selinux
-            - util-linux-libs-selinux
         - name: Build systemd-selinux
           ansible.builtin.command: >
-            makepkg -s -C --noconfirm --no-check
+            makepkg -s -C --noconfirm --nocheck
           args:
             chdir: /home/aur_builder/systemd-selinux
             creates: '/home/aur_builder/systemd-selinux/systemd-selinux*{{ makepkg_ext.stdout }}'
@@ -119,7 +117,6 @@
         - name: Build and install {{ item }}
           ansible.builtin.include_tasks: install_pkgconflict.yml
           loop:
-            - util-linux-libs-selinux
             - util-linux-selinux
             - systemd-selinux
     - name: Download SELinux packages (6/6)
