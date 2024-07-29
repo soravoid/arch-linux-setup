@@ -5,6 +5,16 @@
   become: true
   become_user: aur_builder
 
+- name: Receive GPG keys
+  ansible.builtin.command: >
+    ./recv_gpg_keys.sh /home/aur_builder/{{ item }}
+  become: true
+  become_user: aur_builder
+  args:
+    chdir: assets
+  register: gpg_out
+  changed_when: gpg_out.rc == 0
+
 - name: Find package files in repo for {{ item }}
   ansible.builtin.find:
     path: '/home/aur_builder/{{ item }}'
