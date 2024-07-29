@@ -12,7 +12,7 @@
       - '*.pkg.tar.zstd'
       - '*.pkg.tar.xz.sig'
       - '*.pkg.tar.zstd.sig'
-    register: git_files
+  register: git_files
 - name: 'Delete .pkg.tar.{xz,zstd}{,.sig}'
   ansible.builtin.file:
     path: '{{ file_item }}'
