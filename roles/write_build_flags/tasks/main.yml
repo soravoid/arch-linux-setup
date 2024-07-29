@@ -26,5 +26,6 @@
 
 - name: Change makepkg compression
   ansible.builtin.lineinfile:
+    path: /etc/makepkg.conf
     regexp: '(?m)^PKGEXT=.*'
     line: "PKGEXT='.pkg.tar.lz4'"
