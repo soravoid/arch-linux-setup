@@ -8,6 +8,14 @@
   register: pkgs
   changed_when: false
 
+- name: Copy GPG key utility to aur_builder home
+  ansible.builtin.copy:
+    src: assets/recv_gpg_keys.sh
+    dest: /home/aur_builder/recv_gpg_keys.sh
+    owner: aur_builder
+    group: wheel
+    mode: '0755'
+
 - name: Download SELinux packages
   block:
     - name: Get makepkg compression extension

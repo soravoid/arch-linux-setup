@@ -7,11 +7,9 @@
 
 - name: Receive GPG keys
   ansible.builtin.command: >
-    ./recv_gpg_keys.sh /home/aur_builder/{{ item }}
+    /home/aur_builder/recv_gpg_keys.sh /home/aur_builder/{{ item }}
   become: true
   become_user: aur_builder
-  args:
-    chdir: assets
   register: gpg_out
   changed_when: gpg_out.rc == 0
 
