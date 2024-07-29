@@ -3,6 +3,11 @@
     name: python-pexpect
     state: present
 
+- name: Query all installed packages
+  ansible.builtin.command: pacman -Qe
+  register: pkgs
+  changed_when: false
+
 - name: Download SELinux packages
   block:
     - name: Get makepkg compression extension
@@ -29,11 +34,13 @@
       become: true
       become_user: aur_builder
     - name: Download SELinux packages (2/5)
+      when: not item in pkgs.stdout
       ansible.builtin.include_tasks: install_pkgconflict.yml
       loop:
         - pambase-selinux
         - pam-selinux
     - name: Download SELinux packages (3/5)
+      when: not item in pkgs.stdout
       ansible.builtin.include_tasks: install_pkgconflict.yml
       loop:
         - coreutils-selinux
@@ -45,6 +52,7 @@
         - shadow-selinux
         - cronie-selinux
     - name: Download SELinux packages (4/5)
+      when: not "sudo-selinux" in pkgs.stdout
       block:
         - name: Check if sudoers file exists
           ansible.builtin.stat:
@@ -94,6 +102,7 @@
             path: /home/aur_builder/sudo-selinux
             state: absent
     - name: Download SELinux packages (5/5)
+      when: not item in pkgs.stdout
       ansible.builtin.include_tasks: install_pkgconflict.yml
       loop:
         - util-linux-selinux
