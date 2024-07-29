@@ -29,7 +29,10 @@
   become: true
   become_user: aur_builder
 - name: Installing {{ item }}
-  ansible.builtin.shell: >
-    pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + item + '*' + makepkg_ext.stdout) | first }}
+  ansible.builtin.expect:
+    command: >
+      pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + item + '*' + makepkg_ext.stdout) | first }}
+    responses:
+      '{{ "(?m)^:: " + item + ".*? and (.*)-.? are in conflict.*$" }}': y
   register: pacman_out
   changed_when: pacman_out.rc == 0
