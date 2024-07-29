@@ -34,7 +34,7 @@
 
 - name: Build {{ item }}
   ansible.builtin.shell: >
-    makepkg -s -C --noconfirm{% if item == 'systemd-selinux' %} --no-check{% endif %}
+    makepkg -s -C --noconfirm
   args:
     chdir: '/home/aur_builder/{{ item }}'
     creates: '/home/aur_builder/{{ item + "/*" + makepkg_ext.stdout }}'

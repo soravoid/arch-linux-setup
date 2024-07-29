@@ -22,7 +22,7 @@
       ansible.builtin.command: bash -c 'source /etc/makepkg.conf; echo "$PKGEXT"'
       register: makepkg_ext
       changed_when: false
-    - name: Download SELinux packages (1/5)
+    - name: Download SELinux packages (1/6)
       kewlfft.aur.aur:
         name:
           - libsepol
@@ -41,13 +41,13 @@
         use: paru
       become: true
       become_user: aur_builder
-    - name: Download SELinux packages (2/5)
+    - name: Download SELinux packages (2/6)
       when: not item in pkgs.stdout
       ansible.builtin.include_tasks: install_pkgconflict.yml
       loop:
         - pambase-selinux
         - pam-selinux
-    - name: Download SELinux packages (3/5)
+    - name: Download SELinux packages (3/6)
       when: not item in pkgs.stdout
       ansible.builtin.include_tasks: install_pkgconflict.yml
       loop:
@@ -59,7 +59,7 @@
         - psmisc-selinux
         - shadow-selinux
         - cronie-selinux
-    - name: Download SELinux packages (4/5)
+    - name: Download SELinux packages (4/6)
       when: not "sudo-selinux" in pkgs.stdout
       block:
         - name: Check if sudoers file exists
@@ -90,14 +90,42 @@
           ansible.builtin.file:
             path: /home/aur_builder/sudo-selinux
             state: absent
-    - name: Download SELinux packages (5/5)
+    - name: Download SELinux packages (5/6)
+      when: 'not "util-linux-selinux" in pkgs.stdout or not "systemd-selinux" in pkgs.stdout'
+      block:
+        - name: Clone git repo for {{ item }}  # noqa: latest
+          ansible.builtin.git:
+            repo: 'https://aur.archlinux.org/{{ item }}.git'
+            dest: /home/aur_builder/{{ item }}
+          become: true
+          become_user: aur_builder
+          loop:
+            - systemd-selinux
+            - systemd-libs-selinux
+            - util-linux-selinux
+            - util-linux-libs-selinux
+        - name: Build systemd-selinux
+          ansible.builtin.command: >
+            makepkg -s -C --noconfirm --no-check
+          args:
+            chdir: /home/aur_builder/systemd-selinux
+            creates: '/home/aur_builder/systemd-selinux/systemd-selinux*{{ makepkg_ext.stdout }}'
+          become: true
+          become_user: aur_builder
+        - name: Build and install systemd-libs-selinux
+          ansible.builtin.include_tasks: install_pkgconflict.yml
+          vars:
+            item: systemd-libs-selinux
+        - name: Build and install {{ item }}
+          ansible.builtin.include_tasks: install_pkgconflict.yml
+          loop:
+            - util-linux-libs-selinux
+            - util-linux-selinux
+            - systemd-selinux
+    - name: Download SELinux packages (6/6)
       when: not item in pkgs.stdout
       ansible.builtin.include_tasks: install_pkgconflict.yml
       loop:
-        - util-linux-selinux
-        - systemd-selinux
-        - util-linux-selinux
-        - systemd-selinux
         - dbus-linux
         - selinux-alpm-hook
 
