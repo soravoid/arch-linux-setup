@@ -23,3 +23,8 @@
         regexp: '(?m)^RUSTFLAGS="((?!-C target-cpu=native -C link-arg=-fuse-ld=mold )-C.*)$'
         backrefs: true
         line: 'RUSTFLAGS="-C target-cpu=native -C link-arg=-fuse-ld=mold \1'
+
+- name: Change makepkg compression
+  ansible.builtin.lineinfile:
+    regexp: '(?m)^PKGEXT=.*'
+    line: "PKGEXT='.pkg.tar.lz4'"
