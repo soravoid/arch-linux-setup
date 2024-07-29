@@ -4,6 +4,7 @@
     dest: '/home/aur_builder/{{ item }}'
   become: true
   become_user: aur_builder
+
 - name: Find package files in repo for {{ item }}
   ansible.builtin.find:
     path: '/home/aur_builder/{{ item }}'
@@ -13,6 +14,7 @@
       - '*.pkg.tar.xz.sig'
       - '*.pkg.tar.zstd.sig'
   register: git_files
+
 - name: 'Delete .pkg.tar.{xz,zstd}{,.sig}'
   ansible.builtin.file:
     path: '{{ file_item }}'
@@ -20,6 +22,7 @@
   loop: '{{ git_files.files }}'
   loop_control:
     loop_var: file_item
+
 - name: Building {{ item }}
   ansible.builtin.shell: >
     makepkg -s -C --noconfirm{% if item == 'systemd-selinux' %} --no-check{% endif %}
@@ -28,11 +31,15 @@
     creates: '/home/aur_builder/{{ item }}/{{ item + "*" + makepkg_ext.stdout }}'
   become: true
   become_user: aur_builder
+
 - name: Installing {{ item }}
-  ansible.builtin.expect:
-    command: >
-      bash -c "pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + item + '*' + makepkg_ext.stdout) | first }}"
-    responses:
-      '{{ "(?m)^:: " + item + ".* are in conflict.*$" }}': y
+  ansible.builtin.shell: >
+    set -o pipefail
+    echo y | pacman -U {{ q('ansible.builtin.fileglob', '/home/aur_builder/' + item + '/' + item + '*' + makepkg_ext.stdout) | first }}
   register: pacman_out
   changed_when: pacman_out.rc == 0
+
+- name: Cleaning up build files for {{ item }}
+  ansible.builtin.file:
+    path: /home/aur_builder/{{ item }}
+    state: absent
