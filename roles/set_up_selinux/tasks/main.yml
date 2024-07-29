@@ -75,31 +75,11 @@
             dest: /etc/sudoers.pacsave
             mode: preserve
           when: sudoers.stat.exists
-        - name: Clone sudo-selinux repo  # noqa: latest
-          ansible.builtin.git:
-            repo: https://aur.archlinux.org/sudo-selinux.git
-            dest: /home/aur_builder/sudo-selinux
-          become: true
-          become_user: aur_builder
-        - name: Build sudo-selinux
-          ansible.builtin.command: makepkg -s -C --noconfirm
-          args:
-            chdir: /home/aur_builder/sudo-selinux
-            creates: '{{ "/home/aur_builder/sudo-selinux/sudo-selinux*" + makepkg_ext.stdout }}'
-          become: true
-          become_user: aur_builder
-        - name: Find sudo-selinux package
-          ansible.builtin.find:
-            patterns: '{{ "sudo-selinux-*" + makepkg_ext.stdout }}'
-            file_type: file
-            paths: ["/home/aur_builder/sudo-selinux"]
-            use_regex: false
-          register: selinux_exec
         - name: Install sudo-selinux
-          ansible.builtin.command: >
-            pacman -U --ask=4 {{ lookup('ansible.builtin.fileglob', '/home/aur_builder/sudo-selinux/sudo-selinux*' + makepkg_ext.stdout) | first | trim }}
-          register: pacman_out
-          changed_when: pacman_out.rc == 0
+          when: 'not "sudo-selinux" in pkgs.stdout'
+          ansible.builtin.include_tasks: install_pkgconflict.yml
+          vars:
+            item: 'sudo-selinux'
         - name: Change default sudoers file with previous sudoers
           when: sudoers.stat.exists
           ansible.builtin.command: mv /etc/sudoers.pacsave /etc/sudoers
