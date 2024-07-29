@@ -8,7 +8,7 @@
     url: 'https://raw.githubusercontent.com/archlinuxhardened/selinux/master/recv_gpg_keys.sh'
     dest: /home/aur_builder/recv_gpg_keys.sh
     owner: aur_builder
-    group: aur_builder
+    group: wheel
     mode: '0755'
 
 - name: Import GPG keys via script
