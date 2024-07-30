@@ -131,7 +131,7 @@
 
 - name: Download SELinux refpolicy
   kewlfft.aur.aur:
-    name: selinux-refpolicy-src
+    name: selinux-refpolicy-arch
     state: present
     use: paru
   become: true
@@ -151,25 +151,7 @@
   ansible.builtin.lineinfile:
     path: /etc/selinux/config
     regexp: '(?m)^SELINUXTYPE='
-    line: 'SELINUXTYPE=refpolicy'
-
-- name: Make SELinux policy patch
-  ansible.builtin.command: '{{ item.cmd }}'
-  with_items:
-    - cmd: 'checkmodule -m -o requiredmod.mod requiredmod.te'
-      result_file: 'requiredmod.mod'
-    - cmd: 'semodule_package -o requiredmod.pp -m requiredmod.mod'
-      result_file: 'requiredmod.pp'
-  args:
-    chdir: assets
-    creates: '{{ item.result_file }}'
-
-- name: Install SELinux policy patch
-  ansible.builtin.command: 'semodule -i requiredmod.pp'
-  args:
-    chdir: assets
-  register: patch_out
-  changed_when: patch_out.rc == 0
+    line: 'SELINUXTYPE=refpolicy-arch'
 
 - name: Remind user to reboot and run command for SELinux
   ansible.builtin.debug:
