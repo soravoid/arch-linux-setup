@@ -22,3 +22,4 @@
     - desktop_env
     - set_up_steam
     - delete_aur_builder
+    - lock_root_passwd
