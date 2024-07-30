@@ -11,7 +11,7 @@
 
 - name: Find firefox profile folder
   ansible.builtin.set_fact:
-    firefox_profile: "{{ lookup('ansible.builtin.fileglob', '/home/user/.mozilla/firefox/*.default') | first | trim }}"
+    firefox_profile: "{{ q('ansible.builtin.fileglob', '/home/user/.mozilla/firefox/*.default') | first | trim }}"
   args:
     chdir: assets
 
