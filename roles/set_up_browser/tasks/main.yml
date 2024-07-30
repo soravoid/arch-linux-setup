@@ -15,15 +15,12 @@
     ls -ld /home/user/.mozilla/firefox/*.default | awk '{print $9}'
   changed_when: false
   register: firefox_profile_out
-
-- name: Set firefox profile path fact
-  ansible.builtin.set_fact:
-    firefox_profile: '{{ firefox_profile_out.stdout }}'
+  failed_when: firefox_profile_out.rc != 0 or firefox_profile_out.stdout|trim == ''
 
 - name: Copy user.js to profile folder
   ansible.builtin.copy:
     src: /usr/share/arkenfox-user.js/user.js
-    dest: '{{ firefox_profile }}/user.js'
+    dest: '{{ firefox_profile.stdout }}/user.js'
     owner: user
     group: user
     mode: '0644'
@@ -31,21 +28,21 @@
 - name: Copy user-overrides.js to profile folder
   ansible.builtin.copy:
     src: assets/user-overrides.js
-    dest: '{{ firefox_profile }}/user-overrides.js'
+    dest: '{{ firefox_profile.stdout }}/user-overrides.js'
     owner: user
     group: user
     mode: '0644'
 
 - name: Update profile with arkenfox scripts
-  ansible.builtin.command: sudo -u user arkenfox-updater -sp {{ firefox_profile }}
+  ansible.builtin.command: sudo -u user arkenfox-updater -sp {{ firefox_profile.stdout }}
   args:
-    chdir: '{{ firefox_profile }}'
+    chdir: '{{ firefox_profile.stdout }}'
   register: arkenfox_out
   changed_when: arkenfox_out.rc == 0
 
 - name: Copy firefox profiles.ini
   ansible.builtin.template:
-    src: assets/firefox_profile_ini
+    src: assets/firefox_profile.stdout_ini
     dest: /home/user/.mozilla/firefox/profiles.ini
     owner: user
     group: user
