@@ -41,7 +41,7 @@
   retries: 3
   become_user: aur_builder
 
-- name: Install {{ pkg_item | basename }}
+- name: Install packages for {{ item }}
   ansible.builtin.command: >
     pacman -U --noconfirm --ask=4 \
     {{ q("ansible.builtin.fileglob", "/home/aur_builder/" + item + "/*" + makepkg_ext.stdout) | join(" ") }}
