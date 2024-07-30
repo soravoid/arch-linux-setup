@@ -92,95 +92,12 @@
             state: absent
     - name: Download SELinux packages (5/6)
       when: 'not "util-linux-selinux" in pkgs.stdout or not "systemd-selinux" in pkgs.stdout'
-      block:
-        - name: Clone git repo for {{ item }}  # noqa: latest
-          ansible.builtin.git:
-            repo: 'https://aur.archlinux.org/{{ item }}.git'
-            dest: /home/aur_builder/{{ item }}
-          become: true
-          become_user: aur_builder
-          loop:
-            - systemd-selinux
-            - util-linux-selinux
-        - name: Receive GPG keys for systemd-selinux
-          ansible.builtin.command: >
-            /home/aur_builder/recv_gpg_keys.sh /home/aur_builder/systemd-selinux
-          become: true
-          become_user: aur_builder
-          register: gpg_out
-          retries: 5
-          changed_when: gpg_out.rc == 0
-        - name: Build systemd-selinux
-          ansible.builtin.command: >
-            makepkg -s -C --noconfirm --nocheck
-          args:
-            chdir: /home/aur_builder/systemd-selinux
-            creates: '/home/aur_builder/systemd-selinux/*{{ makepkg_ext.stdout }}'
-          become: true
-          become_user: aur_builder
-        - name: Install systemd-libs-selinux
-          ansible.builtin.command: >
-            pacman -U --ask=4 \
-            {{ q('ansible.builtin.fileglob', '/home/aur_builder/systemd-selinux/systemd-libs-selinux' + '*' + makepkg_ext.stdout) | first | trim }}
-          register: pacman_out
-          changed_when: pacman_out.rc == 0
-        - name: Build util-linux-selinux
-          ansible.builtin.command: >
-            makepkg -s -C --noconfirm --nocheck
-          args:
-            chdir: /home/aur_builder/util-linux-selinux
-            creates: '/home/aur_builder/util-linux-selinux/*{{ makepkg_ext.stdout }}'
-          register: pacman_out
-          changed_when: pacman_out.rc == 0
-        - name: Install {{ item }}
-          ansible.builtin.command: >
-            pacman -U --ask=4 \
-            {{ q('ansible.builtin.fileglob', '/home/aur_builder/util-linux-selinux/' + item + '*' + makepkg_ext.stdout) | first | trim }}
-          loop:
-            - util-linux-libs-selinux
-            - util-linux-selinux
-          register: pacman_out
-          changed_when: pacman_out.rc == 0
-        - name: Build and install {{ item }}
-          ansible.builtin.include_tasks: install_pkgconflict.yml
-          loop:
-            - util-linux-libs-selinux
-            - util-linux-selinux
-        - name: Rebuild and install systemd-selinux
-          block:
-            - name: Find package files in repo for {{ item }}
-              ansible.builtin.find:
-                path: '/home/aur_builder/systemd-selinux'
-                patterns:
-                  - '{{ "*" + makepkg_ext.stdout }}'
-                  - '{{ "*" + makepkg_ext.stdout + ".sig" }}'
-            - name: Delete package files
-              ansible.builtin.file:
-                path: '{{ item }}'
-                state: absent
-              loop: '{{ git_files.files }}'
-              register: git_files
-            - name: Build systemd-selinux
-              ansible.builtin.shell: >
-                makepkg -s -C --noconfirm
-              args:
-                chdir: '/home/aur_builder/systemd-selinux'
-                creates: '/home/aur_builder/systemd-selinux/*{{ makepkg_ext.stdout }}'
-              become: true
-              become_user: aur_builder
-            - name: Install systemd-selinux
-              ansible.builtin.command: >
-                pacman -U --ask=4 \
-                {{ q('ansible.builtin.fileglob', '/home/aur_builder/systemd-selinux/systemd-selinux*' + makepkg_ext.stdout) | first | trim }}
-              register: pacman_out
-              changed_when: pacman_out.rc == 0
-        - name: Remove git repo directory for {{ item }}
-          ansible.builtin.file:
-            path: /home/aur_builder/{{ item }}
-            state: absent
-          loop:
-            - systemd-selinux
-            - util-linux-selinux
+      ansible.builtin.include_tasks: install_pkgconflict.yml
+      loop:
+        - util-linux-selinux
+        - systemd-selinux
+        - util-linux-selinux
+        - systemd-selinux
     - name: Download SELinux packages (6/6)
       when: not item in pkgs.stdout
       ansible.builtin.include_tasks: install_pkgconflict.yml
