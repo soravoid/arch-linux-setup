@@ -10,10 +10,15 @@
     creates: /home/user/.mozilla/firefox/*.default
 
 - name: Find firefox profile folder
+  ansible.builtin.shell: >
+    set -o pipefail
+    ls -ld /home/user/.mozilla/firefox/*.default | awk '{print $9}'
+  changed_when: false
+  register: firefox_profile_out
+
+- name: Set firefox profile path fact
   ansible.builtin.set_fact:
-    firefox_profile: "{{ q('ansible.builtin.fileglob', '/home/user/.mozilla/firefox/*.default') | first | trim }}"
-  args:
-    chdir: assets
+    firefox_profile: '{{ firefox_profile_out.stdout }}'
 
 - name: Copy user.js to profile folder
   ansible.builtin.copy:
