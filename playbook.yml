@@ -12,7 +12,6 @@
     - create_aur_builder
     - write_build_flags
     - configure_pacman
-    - set_up_selinux
     - general
     - set_up_terminal
     - set_up_browser
@@ -21,5 +20,6 @@
     - set_up_graphics
     - desktop_env
     - set_up_steam
+    - set_up_selinux
     - delete_aur_builder
     - lock_root_passwd
