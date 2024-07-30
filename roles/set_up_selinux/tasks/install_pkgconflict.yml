@@ -41,13 +41,11 @@
   retries: 3
   become_user: aur_builder
 
-- name: Install {{ item + '/' + pkg_item|basename }}
+- name: Install {{ pkg_item | basename }}
   ansible.builtin.command: >
-    pacman -U --ask=4 {{ pkg_item }}
+    pacman -U --noconfirm --ask=4 \
+    {{ q("ansible.builtin.fileglob", "/home/aur_builder/" + item + "/*" + makepkg_ext.stdout) | join(" ") }}
   register: pacman_out
-  loop: '{{ q("ansible.builtin.fileglob", "/home/aur_builder/" + item + "/*" + makepkg_ext.stdout) }}'
-  loop_control:
-    loop_var: pkg_item
   changed_when: pacman_out.rc == 0
 
 - name: Clean up build files for {{ item }}
