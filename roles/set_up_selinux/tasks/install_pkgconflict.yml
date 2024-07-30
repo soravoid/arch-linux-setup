@@ -41,7 +41,7 @@
   retries: 3
   become_user: aur_builder
 
-- name: '{{ "Install " + pkg_item|basename + " for " + item }}'
+- name: Install {{ item + '/' + pkg_item|basename }}
   ansible.builtin.command: >
     pacman -U --ask=4 {{ pkg_item }}
   register: pacman_out
