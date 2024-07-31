@@ -95,13 +95,10 @@
 
 - name: Set up secure-time-sync and cron
   block:
-    - name: Check installed packages
-      ansible.builtin.command: pacman -Qe
-      register: pacman_out
-      changed_when: false
-    - name: Assert that cronie is installed
-      ansible.builtin.assert:
-        that: '"cronie" in pacman_out.stdout'
+    - name: Install cronie
+      community.general.pacman:
+        name: cronie
+        state: present
     - name: Install secure-time-sync into /usr/local/sbin
       ansible.builtin.copy:
         src: assets/secure-time-sync
