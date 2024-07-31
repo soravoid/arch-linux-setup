@@ -42,7 +42,7 @@
 
 - name: Copy firefox profiles.ini
   ansible.builtin.template:
-    src: assets/firefox_profile.stdout_ini
+    src: assets/firefox_profile_ini
     dest: /home/user/.mozilla/firefox/profiles.ini
     owner: user
     group: user
